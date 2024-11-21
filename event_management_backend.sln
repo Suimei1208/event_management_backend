@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.9.34728.123
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "user-services", "user-services\user-services.csproj", "{DD0A32F2-AE60-41E3-8F32-38DE7DD83702}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "event-service", "event-service\event-service.csproj", "{ECFB082E-C3EF-4683-9556-01CEC6931561}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DD0A32F2-AE60-41E3-8F32-38DE7DD83702}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DD0A32F2-AE60-41E3-8F32-38DE7DD83702}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DD0A32F2-AE60-41E3-8F32-38DE7DD83702}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DD0A32F2-AE60-41E3-8F32-38DE7DD83702}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ECFB082E-C3EF-4683-9556-01CEC6931561}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ECFB082E-C3EF-4683-9556-01CEC6931561}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ECFB082E-C3EF-4683-9556-01CEC6931561}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ECFB082E-C3EF-4683-9556-01CEC6931561}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {6E8063E6-8217-4FFC-8C01-92A95D7A2BF9}
+	EndGlobalSection
+EndGlobal
