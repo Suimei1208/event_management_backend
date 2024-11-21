@@ -14,5 +14,11 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)
+    
+    # Build the Docker image for user-services
+    - name: Build the Docker image for user-services
+      run: docker build ./user-services --file ./user-services/Dockerfile --tag user-services:$(date +%s)
+    
+    # Build the Docker image for event-service
+    - name: Build the Docker image for event-service
+      run: docker build ./event-service --file ./event-service/Dockerfile --tag event-service:$(date +%s)
