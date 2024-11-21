@@ -17,7 +17,7 @@ jobs:
     runs-on: windows-latest  # Dùng runner Windows
 
     env:
-      Solution_Name: Solution.sln  # Đảm bảo đúng tên tệp solution của bạn
+      Solution_Name: event_management_backend.sln  
       Wap_Project_Directory: ${{ matrix.service }}/Package
       Wap_Project_Path: ${{ matrix.service }}/Package/${{ matrix.service }}.wapproj
 
@@ -25,9 +25,8 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
       with:
-        fetch-depth: 0  # Đảm bảo tất cả các tệp đều được fetch
+        fetch-depth: 0 
 
-    # Kiểm tra nội dung thư mục để xác nhận tệp solution và các dự án
     - name: List directory contents
       run: |
         dir .  # Kiểm tra thư mục root để chắc chắn rằng Solution.sln tồn tại
