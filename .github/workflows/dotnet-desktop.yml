@@ -11,22 +11,26 @@ jobs:
   build:
     strategy:
       matrix:
-        service: [event-service, user-services]   # Chạy từng service một
+        service: [user-services, order-services]  # Danh sách các service mà bạn có
         configuration: [Debug, Release]
 
-    runs-on: windows-latest  # Chạy trên runner Windows
+    runs-on: windows-latest  # Dùng runner Windows
 
     env:
-      # Thay đổi Solution_Name cho từng service
-      Solution_Name: ${{ matrix.service }}/${{ matrix.service }}.sln
-      Wap_Project_Directory: ${{ matrix.service }}/${{ matrix.service }}.Package
-      Wap_Project_Path: ${{ matrix.service }}/${{ matrix.service }}.Package/${{ matrix.service }}.Package.wapproj
+      Solution_Name: Solution.sln  # Đảm bảo đúng tên tệp solution của bạn
+      Wap_Project_Directory: ${{ matrix.service }}/Package
+      Wap_Project_Path: ${{ matrix.service }}/Package/${{ matrix.service }}.wapproj
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
       with:
-        fetch-depth: 0
+        fetch-depth: 0  # Đảm bảo tất cả các tệp đều được fetch
+
+    # Kiểm tra nội dung thư mục để xác nhận tệp solution và các dự án
+    - name: List directory contents
+      run: |
+        dir .  # Kiểm tra thư mục root để chắc chắn rằng Solution.sln tồn tại
 
     # Cài đặt .NET Core SDK
     - name: Install .NET Core
@@ -38,23 +42,16 @@ jobs:
     - name: Setup MSBuild.exe
       uses: microsoft/setup-msbuild@v2
 
-    # Chạy unit tests
+    # Thực thi unit tests cho tất cả các dự án trong Solution
     - name: Execute unit tests
       run: dotnet test ${{ env.Solution_Name }}
 
-    # Restore dependencies cho ứng dụng
+    # Restore dependencies cho tất cả các dự án
     - name: Restore dependencies
       run: msbuild ${{ env.Solution_Name }} /t:Restore /p:Configuration=${{ matrix.configuration }}
 
-    # Giải mã PFX certificate và lưu nó vào thư mục
-    - name: Decode the PFX certificate
-      run: |
-        $pfx_cert_byte = [System.Convert]::FromBase64String("${{ secrets.Base64_Encoded_Pfx }}")
-        $certificatePath = Join-Path -Path $env:Wap_Project_Directory -ChildPath GitHubActionsWorkflow.pfx
-        [IO.File]::WriteAllBytes("$certificatePath", $pfx_cert_byte)
-
-    # Build và package dự án
-    - name: Build and create app package
+    # Tạo và đóng gói ứng dụng cho từng dịch vụ
+    - name: Create the app package
       run: msbuild ${{ env.Wap_Project_Path }} /p:Configuration=${{ matrix.configuration }} /p:UapAppxPackageBuildMode=$env:Appx_Package_Build_Mode /p:AppxBundle=$env:Appx_Bundle /p:PackageCertificateKeyFile=GitHubActionsWorkflow.pfx /p:PackageCertificatePassword=${{ secrets.Pfx_Key }}
       env:
         Appx_Bundle: Always
@@ -62,11 +59,11 @@ jobs:
         Appx_Package_Build_Mode: StoreUpload
         Configuration: ${{ matrix.configuration }}
 
-    # Xóa PFX sau khi hoàn thành
+    # Xóa PFX certificate sau khi đóng gói
     - name: Remove the PFX certificate
       run: Remove-Item -path $env:Wap_Project_Directory\GitHubActionsWorkflow.pfx
 
-    # Upload MSIX package artifacts
+    # Upload MSIX package dưới dạng artifact
     - name: Upload build artifacts
       uses: actions/upload-artifact@v3
       with:
