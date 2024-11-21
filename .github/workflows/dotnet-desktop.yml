@@ -7,62 +7,188 @@ on:
     branches: [ "master" ]
 
 jobs:
-
-  build:
-    strategy:
-      matrix:
-        service: [user-services, order-services]  # Danh sách các service mà bạn có
-        configuration: [Debug, Release]
-
-    runs-on: windows-latest  # Dùng runner Windows
-
+  build-user-services-debug:
+    runs-on: windows-latest
     env:
-      Solution_Name: event_management_backend.sln  
-      Wap_Project_Directory: ${{ matrix.service }}/Package
-      Wap_Project_Path: ${{ matrix.service }}/Package/${{ matrix.service }}.wapproj
+      Solution_Name: event_management_backend.sln
+      Wap_Project_Directory: user-services/Package
+      Wap_Project_Path: user-services/Package/user-services.wapproj
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
       with:
-        fetch-depth: 0 
+        fetch-depth: 0
 
     - name: List directory contents
-      run: |
-        dir .  # Kiểm tra thư mục root để chắc chắn rằng Solution.sln tồn tại
+      run: dir .  # Kiểm tra thư mục root để chắc chắn rằng Solution.sln tồn tại
 
-    # Cài đặt .NET Core SDK
-    - name: Install .NET Core
+    - name: Install .NET SDK
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 8.0.x
 
-    # Cài đặt MSBuild
     - name: Setup MSBuild.exe
       uses: microsoft/setup-msbuild@v2
 
-    # Thực thi unit tests cho tất cả các dự án trong Solution
-    - name: Execute unit tests
-      run: dotnet test ${{ env.Solution_Name }}
-
-    # Restore dependencies cho tất cả các dự án
     - name: Restore dependencies
-      run: msbuild ${{ env.Solution_Name }} /t:Restore /p:Configuration=${{ matrix.configuration }}
+      run: msbuild ${{ env.Solution_Name }} /t:Restore /p:Configuration=Debug
 
-    # Tạo và đóng gói ứng dụng cho từng dịch vụ
+    - name: Execute unit tests
+      run: dotnet test ${{ env.Solution_Name }} --configuration Debug
+
     - name: Create the app package
-      run: msbuild ${{ env.Wap_Project_Path }} /p:Configuration=${{ matrix.configuration }} /p:UapAppxPackageBuildMode=$env:Appx_Package_Build_Mode /p:AppxBundle=$env:Appx_Bundle /p:PackageCertificateKeyFile=GitHubActionsWorkflow.pfx /p:PackageCertificatePassword=${{ secrets.Pfx_Key }}
+      run: msbuild ${{ env.Wap_Project_Path }} /p:Configuration=Debug /p:UapAppxPackageBuildMode=$env:Appx_Package_Build_Mode /p:AppxBundle=$env:Appx_Bundle /p:PackageCertificateKeyFile=GitHubActionsWorkflow.pfx /p:PackageCertificatePassword=${{ secrets.Pfx_Key }}
       env:
         Appx_Bundle: Always
         Appx_Bundle_Platforms: x86|x64
         Appx_Package_Build_Mode: StoreUpload
-        Configuration: ${{ matrix.configuration }}
+        Configuration: Debug
 
-    # Xóa PFX certificate sau khi đóng gói
     - name: Remove the PFX certificate
       run: Remove-Item -path $env:Wap_Project_Directory\GitHubActionsWorkflow.pfx
 
-    # Upload MSIX package dưới dạng artifact
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: MSIX Package
+        path: ${{ env.Wap_Project_Directory }}\AppPackages
+
+  build-user-services-release:
+    runs-on: windows-latest
+    env:
+      Solution_Name: event_management_backend.sln
+      Wap_Project_Directory: user-services/Package
+      Wap_Project_Path: user-services/Package/user-services.wapproj
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: List directory contents
+      run: dir .  # Kiểm tra thư mục root để chắc chắn rằng Solution.sln tồn tại
+
+    - name: Install .NET SDK
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+
+    - name: Setup MSBuild.exe
+      uses: microsoft/setup-msbuild@v2
+
+    - name: Restore dependencies
+      run: msbuild ${{ env.Solution_Name }} /t:Restore /p:Configuration=Release
+
+    - name: Execute unit tests
+      run: dotnet test ${{ env.Solution_Name }} --configuration Release
+
+    - name: Create the app package
+      run: msbuild ${{ env.Wap_Project_Path }} /p:Configuration=Release /p:UapAppxPackageBuildMode=$env:Appx_Package_Build_Mode /p:AppxBundle=$env:Appx_Bundle /p:PackageCertificateKeyFile=GitHubActionsWorkflow.pfx /p:PackageCertificatePassword=${{ secrets.Pfx_Key }}
+      env:
+        Appx_Bundle: Always
+        Appx_Bundle_Platforms: x86|x64
+        Appx_Package_Build_Mode: StoreUpload
+        Configuration: Release
+
+    - name: Remove the PFX certificate
+      run: Remove-Item -path $env:Wap_Project_Directory\GitHubActionsWorkflow.pfx
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: MSIX Package
+        path: ${{ env.Wap_Project_Directory }}\AppPackages
+
+  build-order-services-debug:
+    runs-on: windows-latest
+    env:
+      Solution_Name: event_management_backend.sln
+      Wap_Project_Directory: order-services/Package
+      Wap_Project_Path: order-services/Package/order-services.wapproj
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: List directory contents
+      run: dir .  # Kiểm tra thư mục root để chắc chắn rằng Solution.sln tồn tại
+
+    - name: Install .NET SDK
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+
+    - name: Setup MSBuild.exe
+      uses: microsoft/setup-msbuild@v2
+
+    - name: Restore dependencies
+      run: msbuild ${{ env.Solution_Name }} /t:Restore /p:Configuration=Debug
+
+    - name: Execute unit tests
+      run: dotnet test ${{ env.Solution_Name }} --configuration Debug
+
+    - name: Create the app package
+      run: msbuild ${{ env.Wap_Project_Path }} /p:Configuration=Debug /p:UapAppxPackageBuildMode=$env:Appx_Package_Build_Mode /p:AppxBundle=$env:Appx_Bundle /p:PackageCertificateKeyFile=GitHubActionsWorkflow.pfx /p:PackageCertificatePassword=${{ secrets.Pfx_Key }}
+      env:
+        Appx_Bundle: Always
+        Appx_Bundle_Platforms: x86|x64
+        Appx_Package_Build_Mode: StoreUpload
+        Configuration: Debug
+
+    - name: Remove the PFX certificate
+      run: Remove-Item -path $env:Wap_Project_Directory\GitHubActionsWorkflow.pfx
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: MSIX Package
+        path: ${{ env.Wap_Project_Directory }}\AppPackages
+
+  build-order-services-release:
+    runs-on: windows-latest
+    env:
+      Solution_Name: event_management_backend.sln
+      Wap_Project_Directory: order-services/Package
+      Wap_Project_Path: order-services/Package/order-services.wapproj
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: List directory contents
+      run: dir .  # Kiểm tra thư mục root để chắc chắn rằng Solution.sln tồn tại
+
+    - name: Install .NET SDK
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+
+    - name: Setup MSBuild.exe
+      uses: microsoft/setup-msbuild@v2
+
+    - name: Restore dependencies
+      run: msbuild ${{ env.Solution_Name }} /t:Restore /p:Configuration=Release
+
+    - name: Execute unit tests
+      run: dotnet test ${{ env.Solution_Name }} --configuration Release
+
+    - name: Create the app package
+      run: msbuild ${{ env.Wap_Project_Path }} /p:Configuration=Release /p:UapAppxPackageBuildMode=$env:Appx_Package_Build_Mode /p:AppxBundle=$env:Appx_Bundle /p:PackageCertificateKeyFile=GitHubActionsWorkflow.pfx /p:PackageCertificatePassword=${{ secrets.Pfx_Key }}
+      env:
+        Appx_Bundle: Always
+        Appx_Bundle_Platforms: x86|x64
+        Appx_Package_Build_Mode: StoreUpload
+        Configuration: Release
+
+    - name: Remove the PFX certificate
+      run: Remove-Item -path $env:Wap_Project_Directory\GitHubActionsWorkflow.pfx
+
     - name: Upload build artifacts
       uses: actions/upload-artifact@v3
       with:
