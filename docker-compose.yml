@@ -1,6 +1,26 @@
-﻿---
-version: '2'
+version: '3.4'
+
 services:
+  user-services:
+    image: ${DOCKER_REGISTRY-}userservices
+    build:
+      context: .
+      dockerfile: user-services/Dockerfile
+    ports:
+      - "5000:5000"
+    networks:
+      - backend
+
+  event-service:
+    image: ${DOCKER_REGISTRY-}eventservice
+    build:
+      context: .
+      dockerfile: event-service/Dockerfile
+    ports:
+      - "5002:5001"
+    networks:
+      - backend
+   
   zookeeper:
     image: confluentinc/cp-zookeeper:7.7.0
     hostname: zookeeper
@@ -10,6 +30,8 @@ services:
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      - backend
 
   broker:
     image: confluentinc/cp-server:7.7.0
@@ -38,6 +60,8 @@ services:
       CONFLUENT_METRICS_REPORTER_TOPIC_REPLICAS: 1
       CONFLUENT_METRICS_ENABLE: 'true'
       CONFLUENT_SUPPORT_CUSTOMER_ID: 'anonymous'
+    networks:
+      - backend
 
   control-center:
     image: confluentinc/cp-enterprise-control-center:7.7.0
@@ -54,19 +78,24 @@ services:
       CONTROL_CENTER_MONITORING_INTERCEPTOR_TOPIC_PARTITIONS: 1
       CONFLUENT_METRICS_TOPIC_REPLICATION: 1
       PORT: 9021
-
+    networks:
+      - backend
+   
   nginx:
     image: nginx:latest
-    container_name: nginx-container
+    container_name: nginx
     ports:
-      - "80:80"
+      - "8000:80"  
+    depends_on:
+      - event-service  
+      - user-services
+    networks:
+      - backend
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf
-      - ./html:/usr/share/nginx/html
-    networks:
-      - webnet
 
 networks:
-  webnet:
+  backend:
     driver: bridge
+  
 

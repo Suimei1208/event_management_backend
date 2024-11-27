@@ -1,25 +1,30 @@
 #See https://aka.ms/customizecontainer to learn how to customize your debug container and how Visual Studio uses this Dockerfile to build your images for faster debugging.
 
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
-event app
+USER app
 WORKDIR /app
-EXPOSE 8080
-EXPOSE 8081
+EXPOSE 5001
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["event-services.csproj", "."]
-RUN dotnet restore "./event-services.csproj"
+COPY ["event-service/event-service.csproj", "event-service/"]
+RUN dotnet restore "./event-service/event-service.csproj"
 COPY . .
-WORKDIR "/src/."
-RUN dotnet build "./event-services.csproj" -c $BUILD_CONFIGURATION -o /app/build
+WORKDIR "/src/event-service"
+RUN dotnet build "./event-service.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./event-services.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "./event-service.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "event-services.dll"]
+ENTRYPOINT ["dotnet", "event-service.dll"]
+
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS hot-reload
+WORKDIR /app
+RUN dotnet tool install -g dotnet-watch
+COPY . .
+ENTRYPOINT ["dotnet", "watch", "run", "--no-restore", "--urls", "http://0.0.0.0:5001"]

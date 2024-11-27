@@ -13,7 +13,7 @@ namespace user_services.Services
         {
             var config = new ProducerConfig
             {
-                BootstrapServers = "localhost:9092",  
+                BootstrapServers = "broker:9092",  
                 Acks = Acks.All
             };
 
