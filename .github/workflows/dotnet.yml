@@ -19,8 +19,11 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: 8.0.x    
+        dotnet-version: 8.0.x
+        
+    - name: Restore NuGet Packages
+      run: dotnet restore event_management_backend.sln
     - name: Build
-      run: dotnet build --no-restore
+      run: dotnet build event_management_backend.sln --no-restore
     - name: Test
-      run: dotnet test --no-build --verbosity normal
+      run: dotnet test event_management_backend.sln --no-build --verbosity normal

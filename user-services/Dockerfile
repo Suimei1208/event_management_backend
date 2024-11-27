@@ -3,16 +3,15 @@
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 USER app
 WORKDIR /app
-EXPOSE 8080
-EXPOSE 8081
+EXPOSE 5000
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["user-services.csproj", "."]
-RUN dotnet restore "./user-services.csproj"
+COPY ["user-services/user-services.csproj", "user-services/"]
+RUN dotnet restore "./user-services/user-services.csproj"
 COPY . .
-WORKDIR "/src/."
+WORKDIR "/src/user-services"
 RUN dotnet build "./user-services.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
@@ -23,3 +22,9 @@ FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "user-services.dll"]
+
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS hot-reload
+WORKDIR /app
+RUN dotnet tool install -g dotnet-watch
+COPY . .
+ENTRYPOINT ["dotnet", "watch", "run", "--no-restore", "--urls", "http://0.0.0.0:5000"]

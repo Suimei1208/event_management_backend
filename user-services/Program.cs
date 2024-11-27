@@ -5,6 +5,9 @@ using user_services.Interface;
 using user_services.Services;
 using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace user_services
 {
@@ -35,6 +38,21 @@ namespace user_services
             builder.Services.AddScoped<IKafkaProducerService, KafkaProducerService>();
             // Cấu hình các dịch vụ liên quan đến API
             builder.Services.AddControllers();
+           /* builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(options =>
+            {
+                options.RequireHttpsMetadata = false;
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = false, 
+                    ValidateAudience = false, 
+                    ValidateLifetime = true, 
+                    ValidateIssuerSigningKey = true, 
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("-strong-secret-keyeventdasdasdasdasdasasdsadasasddas")) 
+                };
+            });*/
+
+            builder.Services.AddAuthorization();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
@@ -50,7 +68,7 @@ namespace user_services
             app.UseHttpsRedirection();
             app.UseMiddleware<LoggingMiddleware>();
             app.UseAuthorization();
-
+            app.UseAuthentication();
             app.MapControllers();
 
             app.Run();

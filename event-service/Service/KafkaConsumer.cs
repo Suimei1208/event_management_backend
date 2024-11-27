@@ -11,7 +11,7 @@ namespace event_service.Service
         {
             var config = new ConsumerConfig
             {
-                BootstrapServers = "localhost:9092",
+                BootstrapServers = "broker:29092",
                 GroupId = "event-service",
                 AutoOffsetReset = AutoOffsetReset.Earliest
             };

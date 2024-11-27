@@ -1,6 +1,7 @@
 ﻿using event_service.DTO;
 using event_service.Interface;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using user_services.JsonData;
 
 namespace event_service.Controllers
@@ -84,6 +85,13 @@ namespace event_service.Controllers
                 Message = "Delete done",
                 Data = NoContent()
             });
+        }
+
+        [HttpGet]
+        public IActionResult GetSecureData()
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            return Ok($"Hello, user {userId}");
         }
     }
 }
