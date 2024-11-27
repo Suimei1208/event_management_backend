@@ -26,4 +26,4 @@ jobs:
     - name: Build
       run: dotnet build event_management_backend.sln --no-restore
     - name: Test
-      run: dotnet test --no-build --verbosity normal
+      run: dotnet test event_management_backend.sln --no-build --verbosity normal
