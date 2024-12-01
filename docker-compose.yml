@@ -17,7 +17,7 @@ services:
       context: .
       dockerfile: event-service/Dockerfile
     ports:
-      - "5002:5001"
+      - "5001:5001"
     networks:
       - backend
    
@@ -85,7 +85,7 @@ services:
     image: nginx:latest
     container_name: nginx
     ports:
-      - "8000:80"  
+      - "80:80"  
     depends_on:
       - event-service  
       - user-services

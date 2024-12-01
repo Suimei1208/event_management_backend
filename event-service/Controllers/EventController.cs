@@ -1,5 +1,6 @@
 ﻿using event_service.DTO;
 using event_service.Interface;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using user_services.JsonData;
@@ -16,7 +17,7 @@ namespace event_service.Controllers
         }
 
         // Tạo sự kiện mới
-        [HttpPost]
+        [HttpPost("create-event")]
         public async Task<ActionResult<EventDto>> CreateEvent(EventDto eventDto)
         {
             var newEvent = await _eventService.CreateEventAsync(eventDto);
@@ -35,7 +36,7 @@ namespace event_service.Controllers
             var eventDto = await _eventService.GetEventAsync(id);
             if (eventDto == null)
             {
-                return NotFound();
+                return NoContent();
             }
             return Ok(new CustomData
             {

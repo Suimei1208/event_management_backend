@@ -33,7 +33,7 @@ namespace user_services
                    new MySqlServerVersion(new Version(9, 0, 1))
                )
            );
-
+            builder.Services.AddScoped<JwtService>();
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IKafkaProducerService, KafkaProducerService>();
             // Cấu hình các dịch vụ liên quan đến API
