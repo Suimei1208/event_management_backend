@@ -55,12 +55,32 @@ namespace user_services.Controllers
 
         // Khi làm update nhớ sử dụng SendUserRoleToKafka
 
-        [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] string firebaseIdToken)
+        [HttpGet("login")]
+        public async Task<IActionResult> Login(string firebaseIdToken)
         {
             var decodedToken = await _firebaseAuthService.VerifyTokenAsync(firebaseIdToken);
-            var customJwt = _jwtService.GenerateJwtToken(decodedToken.Uid, decodedToken.Claims["email"].ToString());
-            return Ok(new { Token = customJwt });
+            //var customJwt = _jwtService.GenerateJwtToken(decodedToken.Uid, decodedToken.Claims["email"].ToString());
+            return Ok(new CustomData{ 
+                Message = "GET ROLE DONE!",
+                Success = true,
+                Data =new 
+                {
+                    //Token = customJwt,
+                    role = _userService.getRole(decodedToken)
+                } 
+            });
+        }
+
+        [HttpPost("UpdateRole")]
+        public async Task<IActionResult> updateRole(string role, string token)
+        {
+            var decodedToken = await _firebaseAuthService.VerifyTokenAsync(token);
+            return Ok(new CustomData
+            {
+                Message = "OK",
+                Success = true,
+                Data = _userService.UpdateRole(role, decodedToken)
+            });
         }
     }
 }
