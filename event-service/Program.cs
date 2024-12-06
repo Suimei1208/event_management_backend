@@ -1,6 +1,9 @@
+using FirebaseAdmin.Auth;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using System.Text;
 using user_services.Middleware;
 
@@ -16,24 +19,60 @@ namespace event_service
             builder.Services.AddDbContext<EventDbContext>(options =>
                options.UseMySql(
                    builder.Configuration.GetConnectionString("DefaultConnection"),
-                   new MySqlServerVersion(new Version(9, 0, 1))
+                   new MySqlServerVersion(new Version(9, 1,0))
                )
             );
             builder.Services.AddControllers();
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-            .AddJwtBearer(options =>
-            {
-                options.TokenValidationParameters = new TokenValidationParameters
+                .AddJwtBearer(
+                op =>
                 {
-                    ValidateIssuer = true,
-                    ValidateAudience = true,
-                    ValidateLifetime = true,
-                    ValidateIssuerSigningKey = true,
-                    ValidIssuer = "user-service",
-                    ValidAudience = "microservices",
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("your-secret-key-hahahahahahahahaha")) 
-                };
-            });
+                    op.Authority = "https://securetoken.google.com/event-management-29368";
+                    op.Audience = "event-management-29368";
+                    op.Events = new JwtBearerEvents
+                    {
+                        OnMessageReceived = context =>
+                        {
+                            var authHeader = context.Request.Headers["Authorization"];
+                            context.Token = authHeader.ToString();
+                            return Task.CompletedTask;
+                        },
+                        OnTokenValidated = async context =>
+                        {
+                            try
+                            {
+                                Console.WriteLine("Token validation started...");
+                                var token = context.SecurityToken as JwtSecurityToken;
+                                if (token != null)
+                                {
+                                    var firebaseToken = await FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token.RawData);
+                                    context.Principal = new ClaimsPrincipal(new ClaimsIdentity(new[] {
+                                    new Claim(ClaimTypes.Name, firebaseToken.Uid)
+                                }, JwtBearerDefaults.AuthenticationScheme));
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                Console.WriteLine($"Error during token validation: {ex.Message}");
+                                context.Fail($"Error validating token: {ex.Message}");
+                            }
+                        },
+                        OnAuthenticationFailed = context =>
+                        {
+                            Console.WriteLine($"Authentication failed: {context.Exception.Message}");
+                            return Task.CompletedTask;
+                        }
+                    };
+
+                    op.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidateAudience = true,
+                        ValidateLifetime = true,
+                        ValidateIssuerSigningKey = true,
+                        ClockSkew = TimeSpan.Zero
+                    };
+                });
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();

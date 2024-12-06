@@ -1,6 +1,7 @@
 ﻿using event_service;
 using event_service.Model;
 using FirebaseAdmin.Auth;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json.Linq;
 using user_services.DTO;
 using user_services.Interface;
@@ -51,14 +52,9 @@ namespace user_services.Services
             return user.Role;
         }
 
-        public async Task<UserDTO> UpdateRole(string role, FirebaseToken token)
+        public async Task<UserDTO> UpdateRole(string role, string id)
         {
-            if (token == null || string.IsNullOrEmpty(token.Uid))
-            {
-                throw new ArgumentException("Invalid Firebase token.");
-            }
-
-            var user = _context.Users.FirstOrDefault(a => a.Id == token.Uid);
+            var user = await _context.Users.FirstOrDefaultAsync(a => a.Id == id);
             if (user == null)
             {
                 throw new InvalidOperationException("User not found.");

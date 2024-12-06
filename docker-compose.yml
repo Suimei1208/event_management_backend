@@ -1,6 +1,21 @@
 version: '3.4'
 
 services:
+  mysql:
+    image: mysql:latest
+    container_name: mysql_container
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_DATABASE: event_manager
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: Admin123456789
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - backend
+
   user-services:
     image: ${DOCKER_REGISTRY-}userservices
     build:
@@ -20,7 +35,7 @@ services:
       - "5001:5001"
     networks:
       - backend
-   
+
   zookeeper:
     image: confluentinc/cp-zookeeper:7.7.0
     hostname: zookeeper
@@ -80,7 +95,7 @@ services:
       PORT: 9021
     networks:
       - backend
-   
+
   nginx:
     image: nginx:latest
     container_name: nginx
@@ -97,5 +112,6 @@ services:
 networks:
   backend:
     driver: bridge
-  
 
+volumes:
+  mysql_data:

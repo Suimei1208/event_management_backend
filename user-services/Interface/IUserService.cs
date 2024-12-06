@@ -8,6 +8,6 @@ namespace user_services.Interface
     {
         Task<users> RegisterUserAsync(FirebaseToken token, UserDTO user);
         string getRole(FirebaseToken token);
-        Task<UserDTO> UpdateRole(string role, FirebaseToken token);
+        Task<UserDTO> UpdateRole(string role, string id);
     }
 }
