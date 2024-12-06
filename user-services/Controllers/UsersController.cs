@@ -42,7 +42,7 @@ namespace user_services.Controllers
                 return BadRequest("User already exists.");
             }
 
-            await _producerService.SendUserRoleToKafka(user.Id, user.Role);
+            //await _producerService.SendUserRoleToKafka(user.Id, user.Role);
 
             return Ok(
                 new CustomData
@@ -58,29 +58,50 @@ namespace user_services.Controllers
         [HttpGet("login")]
         public async Task<IActionResult> Login(string firebaseIdToken)
         {
-            var decodedToken = await _firebaseAuthService.VerifyTokenAsync(firebaseIdToken);
-            //var customJwt = _jwtService.GenerateJwtToken(decodedToken.Uid, decodedToken.Claims["email"].ToString());
+            var decodedToken = await _firebaseAuthService.VerifyTokenAsync(firebaseIdToken);         
+            var role = _userService.getRole(decodedToken);
+            if(role != "None")
+            {
+                await _producerService.SendUserRoleToKafka(decodedToken.Uid, role);
+            }            
             return Ok(new CustomData{ 
                 Message = "GET ROLE DONE!",
                 Success = true,
                 Data =new 
                 {
                     //Token = customJwt,
-                    role = _userService.getRole(decodedToken)
+                    role = role
                 } 
             });
         }
 
         [HttpPost("UpdateRole")]
-        public async Task<IActionResult> updateRole(string role, string token)
+        [Authorize]
+        public async Task<IActionResult> updateRole(string role)
         {
-            var decodedToken = await _firebaseAuthService.VerifyTokenAsync(token);
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized("User ID not found in token");
+            }
+
+            await _producerService.SendUserRoleToKafka(userId, role);
+
+            var updatedUser = await _userService.UpdateRole(role, userId);
+
+            if (updatedUser == null)
+            {
+                return NotFound("User update failed.");
+            }
             return Ok(new CustomData
             {
                 Message = "OK",
                 Success = true,
-                Data = _userService.UpdateRole(role, decodedToken)
+                Data = updatedUser
             });
         }
+
+
     }
 }

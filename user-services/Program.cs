@@ -8,6 +8,10 @@ using Google.Apis.Auth.OAuth2;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using System.IdentityModel.Tokens.Jwt;
+using FirebaseAdmin.Auth;
+using Microsoft.Extensions.Options;
+using System.Security.Claims;
 
 namespace user_services
 {
@@ -24,34 +28,70 @@ namespace user_services
                     Credential = GoogleCredential.FromFile("firebase-credentials.json")
                 });
             });
+            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(
+                op =>
+                {
+                    op.Authority = "https://securetoken.google.com/event-management-29368"; 
+                    op.Audience = "event-management-29368"; 
+                    op.Events = new JwtBearerEvents
+                    {
+                        OnMessageReceived = context =>
+                        {
+                            var authHeader = context.Request.Headers["Authorization"];
+                            context.Token = authHeader.ToString();                          
+                            return Task.CompletedTask;
+                        },
+                        OnTokenValidated = async context =>
+                        {
+                            try
+                            {
+                                Console.WriteLine("Token validation started...");
+                                var token = context.SecurityToken as JwtSecurityToken;
+                                if (token != null)
+                                {
+                                    var firebaseToken = await FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token.RawData);
+                                    context.Principal = new ClaimsPrincipal(new ClaimsIdentity(new[] {
+                                    new Claim(ClaimTypes.Name, firebaseToken.Uid)
+                                }, JwtBearerDefaults.AuthenticationScheme));
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                Console.WriteLine($"Error during token validation: {ex.Message}");
+                                context.Fail($"Error validating token: {ex.Message}");
+                            }
+                        },
+                        OnAuthenticationFailed = context =>
+                        {
+                            Console.WriteLine($"Authentication failed: {context.Exception.Message}");
+                            return Task.CompletedTask;
+                        }
+                    };
+
+                    op.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidateAudience = true,
+                        ValidateLifetime = true,
+                        ValidateIssuerSigningKey = true,
+                        ClockSkew = TimeSpan.Zero
+                    };
+                });
 
             builder.Services.AddSingleton<IFirebaseAuthService, FirebaseAuthService>();
 
             builder.Services.AddDbContext<UserDbContext>(options =>
                options.UseMySql(
                    builder.Configuration.GetConnectionString("DefaultConnection"),
-                   new MySqlServerVersion(new Version(9, 0, 1))
-               )
+                   new MySqlServerVersion(new Version(9, 1, 0))
+               ).EnableDetailedErrors()
            );
             builder.Services.AddScoped<JwtService>();
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IKafkaProducerService, KafkaProducerService>();
             // Cấu hình các dịch vụ liên quan đến API
             builder.Services.AddControllers();
-           /* builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-            .AddJwtBearer(options =>
-            {
-                options.RequireHttpsMetadata = false;
-                options.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuer = false, 
-                    ValidateAudience = false, 
-                    ValidateLifetime = true, 
-                    ValidateIssuerSigningKey = true, 
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("-strong-secret-keyeventdasdasdasdasdasasdsadasasddas")) 
-                };
-            });*/
-
             builder.Services.AddAuthorization();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
@@ -67,8 +107,8 @@ namespace user_services
 
             app.UseHttpsRedirection();
             app.UseMiddleware<LoggingMiddleware>();
-            app.UseAuthorization();
             app.UseAuthentication();
+            app.UseAuthorization();
             app.MapControllers();
 
             app.Run();
