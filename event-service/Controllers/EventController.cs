@@ -1,5 +1,6 @@
 ﻿using event_service.DTO;
 using event_service.Interface;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -18,16 +19,41 @@ namespace event_service.Controllers
 
         // Tạo sự kiện mới
         [HttpPost("create-event")]
-        public async Task<ActionResult<EventDto>> CreateEvent(EventDto eventDto)
+        [Authorize]
+        public async Task<ActionResult<CustomData>> CreateEvent([FromBody] EventDto eventDto)
         {
+            if (eventDto == null)
+            {
+                return BadRequest(new CustomData
+                {
+                    Success = false,
+                    Message = "Invalid input data",
+                    Data = null
+                });
+            }
+
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId == null)
+            {
+                return Unauthorized(new CustomData
+                {
+                    Success = false,
+                    Message = "User is not authorized",
+                    Data = null
+                });
+            }
+            eventDto.IdCreate = userId;
+
             var newEvent = await _eventService.CreateEventAsync(eventDto);
+
             return Ok(new CustomData
             {
                 Success = true,
-                Message = "OK",
+                Message = "Event created successfully",
                 Data = newEvent
             });
         }
+
 
         // Lấy thông tin sự kiện theo ID
         [HttpGet("{id}")]
