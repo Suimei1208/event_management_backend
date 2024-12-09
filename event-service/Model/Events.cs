@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.CodeAnalysis;
 
 namespace event_service.Model
 {
@@ -22,10 +23,10 @@ namespace event_service.Model
         public string Location { get; set; }
 
         public string TargetAudience { get; set; }
-
+        [AllowNull]
         public string Banner { get; set; }
-
+        public string Status { get; set; }
         [Required]
-        public string Category { get; set; }
+        public string type { get; set; }
     }
 }

@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 
-namespace user_services.Middleware
+namespace event_service.Middleware
 {
     public class LoggingMiddleware
     {

@@ -8,33 +8,21 @@ namespace event_service.Service
     public class EventService : IEventService
     {
         private readonly EventDbContext _context;
-        private readonly IKafkaConsumer _consumer;
 
-        public EventService(EventDbContext context, IKafkaConsumer consumer)
+        public EventService(EventDbContext context)
         {
             _context = context;
-            _consumer = consumer;
         }
 
         public async Task<EventDto> CreateEventAsync(EventDto eventDto)
-        {
-            var userRoleEvent = await _consumer.ListenForUserRoleChanges(CancellationToken.None);
+        { 
+            Events newEvent = eventDto.ToEntity();
 
-            if (userRoleEvent != null && userRoleEvent.UserId == eventDto.IdCreate 
-                && userRoleEvent.Role.Equals("Organizer", StringComparison.OrdinalIgnoreCase))
-            {
-                Events newEvent = eventDto.ToEntity();
+            _context.Events.Add(newEvent);
+            await _context.SaveChangesAsync();
 
-                _context.Events.Add(newEvent);
-                await _context.SaveChangesAsync();
-
-                return EventMapper.ToDto(newEvent);
-            }
-            else
-            {
-                Console.WriteLine($"Người dùng với ID {eventDto.IdCreate} không phải là Ban tổ chức.");
-                return null;
-            }
+            return EventMapper.ToDto(newEvent);
+           
         }
 
         // Lấy thông tin sự kiện theo ID
@@ -52,7 +40,7 @@ namespace event_service.Service
         public async Task<IEnumerable<EventDto>> GetEventsByCategoryAsync(string category)
         {
             var events = await _context.Events
-                .Where(e => e.Category.ToLower() == category.ToLower())
+                .Where(e => e.type.ToLower() == category.ToLower())
                 .ToListAsync();
 
             return events.Select(EventMapper.ToDto);
@@ -73,7 +61,7 @@ namespace event_service.Service
             eventItem.EndDate = eventDto.EndDate;
             eventItem.Location = eventDto.Location;
             eventItem.TargetAudience = eventDto.TargetAudience;
-            eventItem.Category = eventDto.Category;
+            eventItem.type = eventDto.type;
 
             _context.Entry(eventItem).State = EntityState.Modified;
             await _context.SaveChangesAsync();

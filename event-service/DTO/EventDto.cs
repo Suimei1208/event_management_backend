@@ -12,7 +12,8 @@ namespace event_service.DTO
         public string Location { get; set; }
         public string TargetAudience { get; set; }
         public string Banner {  get; set; }
-        public string Category { get; set; }
+        public string status { get; set; }
+        public string type { get; set; }
     }
     public static class EventMapper
     {
@@ -27,7 +28,8 @@ namespace event_service.DTO
                 EndDate = eventEntity.EndDate,
                 Location = eventEntity.Location,
                 TargetAudience = eventEntity.TargetAudience,
-                Category = eventEntity.Category
+                type = eventEntity.type,
+                status = eventEntity.Status
             };
         }
 
@@ -42,7 +44,8 @@ namespace event_service.DTO
                 EndDate = eventDto.EndDate,
                 Location = eventDto.Location,
                 TargetAudience = eventDto.TargetAudience,
-                Category = eventDto.Category
+                type = eventDto.type,
+                Status = eventDto.status
             };
         }
     }
