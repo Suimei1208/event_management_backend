@@ -33,10 +33,10 @@ namespace user_services.DTO
 
     public class UserDTO
     {
-        public string Id { get; set; }
-        public string Name { get; set; }
-        public string Email { get; set; }
-        public string Phone { get; set; }
-        public string Role { get; set; }
+        public required string Id { get; set; }
+        public required string Name { get; set; } = "Default";
+        public required string Email { get; set; } = "default@gmail.com";
+        public required string Phone { get; set; } = "0000000000";
+        public required string Role { get; set; } = "none";
     }
 }
