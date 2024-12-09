@@ -3,6 +3,8 @@ using event_service.Model;
 using FirebaseAdmin.Auth;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json.Linq;
 using System.Security.Claims;
 using user_services.DTO;
 using user_services.Interface;
@@ -70,7 +72,8 @@ namespace user_services.Controllers
                 Data =new 
                 {
                     //Token = customJwt,
-                    role = role
+                    role = role,
+                    userId = decodedToken.Uid
                 } 
             });
         }
@@ -100,6 +103,83 @@ namespace user_services.Controllers
                 Success = true,
                 Data = updatedUser
             });
+        }
+
+        [HttpPut("UpdateProfile")]
+        [Authorize]
+        public async Task<IActionResult> updateProfile(string name, string phone)
+        {
+            try
+            {
+                var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized("User ID not found in token");
+                }
+
+                // Comment out Kafka for now to isolate the issue
+                // await _producerService.SendUserProfileToKafka(userId, name, phone);
+
+                var updatedUser = await _userService.UpdateProfile(name, phone, userId);
+
+                if (updatedUser == null)
+                {
+                    return NotFound("User update failed.");
+                }
+
+                return Ok(new CustomData
+                {
+                    Message = "OK",
+                    Success = true,
+                    Data = updatedUser
+                });
+            }
+            catch (InvalidOperationException ex)
+            {
+                // Handle specific known exceptions
+                return BadRequest(new CustomData
+                {
+                    Message = ex.Message,
+                    Success = false
+                });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error updating profile: {ex.Message}");
+                // Catch all other exceptions
+                return StatusCode(500, new CustomData
+                {
+                    Message = $"Internal server error: {ex.Message}",
+                    Success = false
+                });
+            }
+        }
+
+
+        [HttpGet("ProfileData")]
+        [Authorize]
+        public async Task<IActionResult> SendUserDetails(string id)
+        {
+            try
+            {
+                var decodedToken = await _firebaseAuthService.VerifyTokenAsync(id);
+                var user = _userService.GetUserDetails(decodedToken);
+                return Ok(new CustomData
+                {
+                    Message = "User details fetched successfully.",
+                    Success = true,
+                    Data = user
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new CustomData
+                {
+                    Message = ex.Message,
+                    Success = false,
+                });
+            }
         }
 
 

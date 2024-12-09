@@ -12,6 +12,7 @@ using System.IdentityModel.Tokens.Jwt;
 using FirebaseAdmin.Auth;
 using Microsoft.Extensions.Options;
 using System.Security.Claims;
+using Newtonsoft.Json.Linq;
 
 namespace user_services
 {
@@ -38,8 +39,14 @@ namespace user_services
                     {
                         OnMessageReceived = context =>
                         {
-                            var authHeader = context.Request.Headers["Authorization"];
-                            context.Token = authHeader.ToString();                          
+                            var authHeader = context.Request.Headers["Authorization"].ToString();
+                            if (!string.IsNullOrEmpty(authHeader) && authHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+                            {
+                                var token = authHeader.Substring("Bearer ".Length).Trim();
+                                Console.WriteLine(token);
+                                context.Token = token.ToString();
+                                
+                            }
                             return Task.CompletedTask;
                         },
                         OnTokenValidated = async context =>

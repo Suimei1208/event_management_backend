@@ -63,7 +63,29 @@ namespace user_services.Services
             await _context.SaveChangesAsync();
             UserDTO currentUser = user.ToDTO();
             return currentUser;
+        }
+        public UserDTO GetUserDetails(FirebaseToken token)
+        {
+            var user = _context.Users.FirstOrDefault(a => a.Id == token.Uid);
+            if (user == null)
+            {
+                throw new InvalidOperationException("User not found.");
+            }
+            return user.ToDTO();
+        }
 
+        public async Task<UserDTO> UpdateProfile(string name, string phone, string id)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(a => a.Id == id);
+            if (user == null)
+            {
+                throw new InvalidOperationException("User not found.");
+            }
+            user.Name = name;
+            user.Phone = phone;
+            await _context.SaveChangesAsync();
+            UserDTO currentUser = user.ToDTO();
+            return currentUser;
         }
     }
 }

@@ -20,6 +20,21 @@ namespace user_services.Services
             _producer = new ProducerBuilder<Null, string>(config).Build();
         }
 
+        public async Task SendUserProfileToKafka(string userId, string newName, string newPhone)
+        {
+            var userProfileEvent = new
+            {
+                UserId = userId,
+                NewName = newName,
+                NewPhone = newPhone
+            };
+
+            var profileMessage = JsonConvert.SerializeObject(userProfileEvent);
+            var message = new Message<Null, string> { Value = profileMessage };
+
+            await _producer.ProduceAsync(_topic, message);
+        }
+
         public async Task SendUserRoleToKafka(string userId, string newRole)
         {
             var userRoleEvent = new 
