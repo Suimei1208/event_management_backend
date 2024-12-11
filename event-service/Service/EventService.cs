@@ -25,15 +25,23 @@ namespace event_service.Service
            
         }
 
-        // Lấy thông tin sự kiện theo ID
-        public async Task<EventDto> GetEventAsync(int id)
+        public async Task<List<EventDto>> GetEventAsync(string id)
         {
-            var eventItem = await _context.Events.FindAsync(id);
-            if (eventItem == null)
+            var eventItems = await _context.Events
+                                    .Where(u => u.IdCreate == id)
+                                    .ToListAsync();
+            if (eventItems == null || !eventItems.Any())
             {
-                return null;
+                return new List<EventDto>();
             }
-            return EventMapper.ToDto(eventItem);
+            foreach (var eventItem in eventItems)
+            {
+                if (eventItem.Banner == null)
+                {
+                    eventItem.Banner = "";
+                }
+            }
+            return eventItems.Select(EventMapper.ToDto).ToList();
         }
 
         // Lọc sự kiện theo loại hình
