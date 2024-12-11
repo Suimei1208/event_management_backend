@@ -56,10 +56,12 @@ namespace event_service.Controllers
 
 
         // Lấy thông tin sự kiện theo ID
-        [HttpGet("{id}")]
-        public async Task<ActionResult<EventDto>> GetEvent(int id)
+        [HttpGet("get-event")]
+        [Authorize]
+        public async Task<ActionResult<EventDto>> GetEvent()
         {
-            var eventDto = await _eventService.GetEventAsync(id);
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var eventDto = await _eventService.GetEventAsync(userId);
             if (eventDto == null)
             {
                 return NoContent();
