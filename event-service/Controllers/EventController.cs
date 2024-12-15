@@ -100,7 +100,8 @@ namespace event_service.Controllers
         }
 
         // Xóa sự kiện
-        [HttpDelete("{id}")]
+        [Authorize]
+        [HttpDelete("delete/{id}")]
         public async Task<IActionResult> DeleteEvent(int id)
         {
             var deleted = await _eventService.DeleteEventAsync(id);

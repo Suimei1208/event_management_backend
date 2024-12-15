@@ -181,7 +181,29 @@ namespace user_services.Controllers
                 });
             }
         }
-
+        [HttpGet("SearchUser")]
+        [Authorize]
+        public async Task<IActionResult> SearchUser(string name)
+        {
+            try
+            {
+                List<CustomUser> listCustomUser = await _userService.SearchUser(name);
+                return Ok(new CustomData
+                {
+                    Message = "Search successfully",
+                    Success = true,
+                    Data = listCustomUser
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new CustomData
+                {
+                    Message = ex.Message,
+                    Success = false,
+                });
+            }
+        }
 
     }
 }

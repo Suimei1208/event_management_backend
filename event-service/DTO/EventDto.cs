@@ -4,6 +4,7 @@ namespace event_service.DTO
 {
     public class EventDto
     {
+        public int id { get; set; }
         public string Name { get; set; }
         public string IdCreate { get; set; }
         public string Description { get; set; }
@@ -21,6 +22,7 @@ namespace event_service.DTO
         {
             return new EventDto
             {
+                id = eventEntity.id,
                 Name = eventEntity.Name,
                 IdCreate = eventEntity.IdCreate,
                 Description = eventEntity.Description,
@@ -37,6 +39,7 @@ namespace event_service.DTO
         {
             return new Events
             {
+                id = eventDto.id,
                 Name = eventDto.Name,
                 IdCreate = eventDto.IdCreate,
                 Description = eventDto.Description,
