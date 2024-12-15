@@ -6,6 +6,7 @@ using Newtonsoft.Json.Linq;
 using user_services.DTO;
 using user_services.Interface;
 using user_services.Request;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace user_services.Services
 {
@@ -87,5 +88,47 @@ namespace user_services.Services
             UserDTO currentUser = user.ToDTO();
             return currentUser;
         }
+
+        public async Task<List<CustomUser>> SearchUser(string name)
+        {
+            var sqlQuery = "SELECT * FROM Users WHERE LOWER(Name) LIKE @p0";
+
+            var ListUser = await _context.Users
+                .FromSqlRaw(sqlQuery, "%" + name.ToLower() + "%") 
+                .ToListAsync();
+
+
+            var customListUser = new List<CustomUser>();
+            foreach (var user in ListUser)
+            {
+                Console.WriteLine(user);
+
+                //try
+                //{
+                //    UserRecord firebaseUser = await FirebaseAuth.DefaultInstance.GetUserAsync(user.Id);
+
+                    customListUser.Add(new CustomUser
+                    {
+                        id = user.Id,
+                        name = user.Name,
+                        role = user.Role,
+                        //avtUrl = firebaseUser.PhotoUrl
+                        avtUrl = null
+                    });
+                //    }
+                //    catch (FirebaseAuthException ex)
+                //    {
+                //        customListUser.Add(new CustomUser
+                //        {
+                //            id = user.Id,
+                //            name = user.Name,
+                //            role = user.Role,
+                //            avtUrl = null
+                //        });
+                //        Console.WriteLine($"Lỗi Firebase cho UID {user.Id}: {ex.Message}");
+                //    }
+            }
+            return customListUser;
+        }
     }
-}
+    }
