@@ -9,5 +9,6 @@ namespace event_service.Interface
         Task<IEnumerable<EventDto>> GetEventsByCategoryAsync(string category);
         Task<bool> UpdateEventAsync(int id, EventDto eventDto);
         Task<bool> DeleteEventAsync(int id);
+        Task<string> GetIdEvent(string idCreate, string name);
     }
 }

@@ -3,6 +3,7 @@ using event_service.Model;
 using FirebaseAdmin.Auth;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json.Linq;
+using System.Diagnostics;
 using user_services.DTO;
 using user_services.Interface;
 using user_services.Request;
@@ -13,10 +14,12 @@ namespace user_services.Services
     public class UserService : IUserService
     {
         private readonly UserDbContext _context;
+        private readonly IFirebaseAuthService _firebaseAuthService;
 
-        public UserService(UserDbContext context)
+        public UserService(UserDbContext context, IFirebaseAuthService firebaseAuthService)
         {
             _context = context;
+            _firebaseAuthService = firebaseAuthService;
         }
 
         public async Task<users> RegisterUserAsync(FirebaseToken token, UserDTO user)
@@ -91,7 +94,7 @@ namespace user_services.Services
 
         public async Task<List<CustomUser>> SearchUser(string name)
         {
-            return await _context.Users
+            var listUser = await _context.Users
                 .Where(user => user.Name.Contains(name))
                 .Select(user => new CustomUser
                 {
@@ -100,7 +103,28 @@ namespace user_services.Services
                     role = user.Role,
                 })
                 .ToListAsync();
+            var customListUser = new List<CustomUser>();
+
+            foreach (var user in listUser)
+            {
+                try
+                {
+                    customListUser.Add(new CustomUser
+                    {
+                        id = user.id,
+                        name = user.name,
+                        role = user.role,
+                        avtUrl = await _firebaseAuthService.GetUserPhotoUrl(user.id)
+                    });
+                }
+                catch (FirebaseAuthException ex)
+                {
+                    Console.WriteLine($"Firebase error for user {user.id}: {ex.Message}");
+                }
+            }
+            return customListUser;
         }
+
 
     }
 }

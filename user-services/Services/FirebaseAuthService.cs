@@ -29,5 +29,20 @@ namespace user_services.Services
                 throw new Exception($"Token verification failed: {e.Message}");
             }
         }
+        public async Task<string> GetUserPhotoUrl(string uid)
+        {
+            try
+            {
+                UserRecord userRecord = await FirebaseAuth.DefaultInstance.GetUserAsync(uid);
+
+                string photoUrl = userRecord.PhotoUrl;
+                return photoUrl;
+            }
+            catch (FirebaseAuthException ex)
+            {
+                Console.WriteLine($"Lỗi khi lấy thông tin người dùng: {ex.Message}");
+                return null;
+            }
+        }
     }
 }

@@ -2,6 +2,8 @@
 using event_service.Interface;
 using event_service.Model;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.ObjectPool;
+using System.Text;
 
 namespace event_service.Service
 {
@@ -92,6 +94,20 @@ namespace event_service.Service
 
             return true;
         }
+
+        public async Task<string> GetIdEvent(string idCreate, string name)
+        {
+            var currentEvent = await _context.Events
+                .FirstOrDefaultAsync(p => p.IdCreate == idCreate && p.Name == name);
+
+            if (currentEvent == null)
+            {
+                return null; 
+            }
+
+            return currentEvent.id.ToString();
+        }
+
     }
 
 }
