@@ -70,6 +70,7 @@ namespace event_service.Service
             eventItem.Location = eventDto.Location;
             eventItem.TargetAudience = eventDto.TargetAudience;
             eventItem.type = eventDto.type;
+            eventItem.Banner = eventDto.Banner;
 
             _context.Entry(eventItem).State = EntityState.Modified;
             await _context.SaveChangesAsync();

@@ -185,6 +185,15 @@ namespace user_services.Controllers
         [Authorize]
         public async Task<IActionResult> SearchUser(string name)
         {
+            if (string.IsNullOrEmpty(name))
+            {
+                return BadRequest(new CustomData
+                {
+                    Message = "Name parameter is required",
+                    Success = false,
+                });
+            }
+
             try
             {
                 List<CustomUser> listCustomUser = await _userService.SearchUser(name);
@@ -204,6 +213,7 @@ namespace user_services.Controllers
                 });
             }
         }
+
 
     }
 }

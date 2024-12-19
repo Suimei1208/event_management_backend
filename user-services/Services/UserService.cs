@@ -91,44 +91,16 @@ namespace user_services.Services
 
         public async Task<List<CustomUser>> SearchUser(string name)
         {
-            var sqlQuery = "SELECT * FROM Users WHERE LOWER(Name) LIKE @p0";
-
-            var ListUser = await _context.Users
-                .FromSqlRaw(sqlQuery, "%" + name.ToLower() + "%") 
+            return await _context.Users
+                .Where(user => user.Name.Contains(name))
+                .Select(user => new CustomUser
+                {
+                    id = user.Id,
+                    name = user.Name,
+                    role = user.Role,
+                })
                 .ToListAsync();
-
-
-            var customListUser = new List<CustomUser>();
-            foreach (var user in ListUser)
-            {
-                Console.WriteLine(user);
-
-                //try
-                //{
-                //    UserRecord firebaseUser = await FirebaseAuth.DefaultInstance.GetUserAsync(user.Id);
-
-                    customListUser.Add(new CustomUser
-                    {
-                        id = user.Id,
-                        name = user.Name,
-                        role = user.Role,
-                        //avtUrl = firebaseUser.PhotoUrl
-                        avtUrl = null
-                    });
-                //    }
-                //    catch (FirebaseAuthException ex)
-                //    {
-                //        customListUser.Add(new CustomUser
-                //        {
-                //            id = user.Id,
-                //            name = user.Name,
-                //            role = user.Role,
-                //            avtUrl = null
-                //        });
-                //        Console.WriteLine($"Lỗi Firebase cho UID {user.Id}: {ex.Message}");
-                //    }
-            }
-            return customListUser;
         }
+
     }
-    }
+}
