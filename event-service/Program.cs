@@ -1,5 +1,6 @@
 using event_service.Interface;
 using event_service.Middleware;
+using event_service.Model;
 using event_service.Service;
 using FirebaseAdmin;
 using FirebaseAdmin.Auth;
@@ -100,6 +101,7 @@ namespace event_service
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
             builder.Services.AddScoped<IEventService, EventService>();
+            builder.Services.AddScoped<IParticipantsService, ParticipantsService>();
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.

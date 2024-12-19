@@ -11,8 +11,9 @@ namespace event_service.Model
 
         [Required]
         public string userId { get; set; }
-        public string eventId { get; set; }
+        public int eventId { get; set; }
         public DateTime registration_Date { get; set; }
         public string status { get; set; }
+        public string role {  get; set; }
     }
 }

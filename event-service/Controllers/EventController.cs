@@ -16,6 +16,17 @@ namespace event_service.Controllers
         {
             _eventService = eventService;
         }
+        [HttpGet("getid")]
+        [Authorize]
+        public async Task<IActionResult> getidEvent(string idCreate, string name)
+        {
+            return Ok(new CustomData
+            {
+                Success = true,
+                Message = "Event created successfully",
+                Data = await _eventService.GetIdEvent(idCreate, name)
+            });
+        }
 
         // Tạo sự kiện mới
         [HttpPost("create-event")]
