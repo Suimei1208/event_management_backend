@@ -31,7 +31,8 @@ namespace event_service.DTO
                 Location = eventEntity.Location,
                 TargetAudience = eventEntity.TargetAudience,
                 type = eventEntity.type,
-                status = eventEntity.Status
+                status = eventEntity.Status,
+                Banner = eventEntity.Banner
             };
         }
 
@@ -48,7 +49,8 @@ namespace event_service.DTO
                 Location = eventDto.Location,
                 TargetAudience = eventDto.TargetAudience,
                 type = eventDto.type,
-                Status = eventDto.status
+                Status = eventDto.status,
+                Banner = eventDto.Banner
             };
         }
     }
