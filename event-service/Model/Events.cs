@@ -28,5 +28,7 @@ namespace event_service.Model
         public string Status { get; set; }
         [Required]
         public string type { get; set; }
+
+        public ICollection<Participants> Participants { get; set; } = new List<Participants>();
     }
 }

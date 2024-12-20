@@ -134,5 +134,29 @@ namespace event_service.Controllers
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             return Ok($"Hello, user {userId}");
         }
+
+        [HttpGet("event/{id}")]
+        [Authorize]
+        public async Task<IActionResult> GetEventById(int id)
+        {
+            var eventWithParticipants = await _eventService.GetEventByIdAsync(id);
+            if (eventWithParticipants == null)
+            {
+                return NotFound(new CustomData
+                {
+                    Success = false,
+                    Message = "Event not found",
+                    Data = null
+                });
+            }
+
+            return Ok(new CustomData
+            {
+                Success = true,
+                Message = "Event retrieved successfully",
+                Data = eventWithParticipants
+            });
+        }
+
     }
 }
