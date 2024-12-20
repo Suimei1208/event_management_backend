@@ -108,6 +108,30 @@ namespace event_service.Service
             return currentEvent.id.ToString();
         }
 
+        public async Task<EventWithParticipantsDto> GetEventByIdAsync(int id)
+        {
+            var eventEntity = await _context.Events.FindAsync(id);
+
+            if (eventEntity == null)
+            {
+                return null;
+            }
+
+            return new EventWithParticipantsDto
+            {
+                Id = eventEntity.id,
+                Name = eventEntity.Name,
+                Description = eventEntity.Description,
+                StartDate = eventEntity.StartDate,
+                EndDate = eventEntity.EndDate,
+                Location = eventEntity.Location,
+                TargetAudience = eventEntity.TargetAudience,
+                Status = eventEntity.Status,
+                Type = eventEntity.type,
+                Banner = eventEntity.Banner,
+                Participants = eventEntity.Participants?.Select(ParticipantsMapper.ToDto).ToList() ?? new List<ParticipantsDto>()
+            };
+        }
     }
 
 }

@@ -11,9 +11,13 @@ namespace event_service.Model
 
         [Required]
         public string userId { get; set; }
+
+        [ForeignKey("Event")]
         public int eventId { get; set; }
         public DateTime registration_Date { get; set; }
         public string status { get; set; }
         public string role {  get; set; }
+
+        public Events Event { get; set; }
     }
 }
