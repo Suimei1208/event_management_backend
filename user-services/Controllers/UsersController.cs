@@ -20,15 +20,13 @@ namespace user_services.Controllers
     {
         private readonly IFirebaseAuthService _firebaseAuthService;
         private readonly IUserService _userService;
-        private readonly IKafkaProducerService _producerService;
         private readonly JwtService _jwtService;
 
         public UsersController(IFirebaseAuthService firebaseAuthService, 
-            IUserService userService, IKafkaProducerService kafkaProducerService, JwtService jwtService)
+            IUserService userService, JwtService jwtService)
         {
             _firebaseAuthService = firebaseAuthService;
             _userService = userService;
-            _producerService = kafkaProducerService;
             _jwtService = jwtService;   
         }
 
@@ -44,8 +42,6 @@ namespace user_services.Controllers
                 return BadRequest("User already exists.");
             }
 
-            //await _producerService.SendUserRoleToKafka(user.Id, user.Role);
-
             return Ok(
                 new CustomData
                 {
@@ -55,17 +51,12 @@ namespace user_services.Controllers
                 });
         }
 
-        // Khi làm update nhớ sử dụng SendUserRoleToKafka
-
         [HttpGet("login")]
         public async Task<IActionResult> Login(string firebaseIdToken)
         {
             var decodedToken = await _firebaseAuthService.VerifyTokenAsync(firebaseIdToken);         
             var role = _userService.getRole(decodedToken);
-            if(role != "None")
-            {
-                await _producerService.SendUserRoleToKafka(decodedToken.Uid, role);
-            }            
+                   
             return Ok(new CustomData{ 
                 Message = "GET ROLE DONE!",
                 Success = true,
@@ -88,8 +79,6 @@ namespace user_services.Controllers
             {
                 return Unauthorized("User ID not found in token");
             }
-
-            await _producerService.SendUserRoleToKafka(userId, role);
 
             var updatedUser = await _userService.UpdateRole(role, userId);
 
@@ -117,9 +106,6 @@ namespace user_services.Controllers
                 {
                     return Unauthorized("User ID not found in token");
                 }
-
-                // Comment out Kafka for now to isolate the issue
-                // await _producerService.SendUserProfileToKafka(userId, name, phone);
 
                 var updatedUser = await _userService.UpdateProfile(name, phone, userId);
 
