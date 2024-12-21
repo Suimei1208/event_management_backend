@@ -1,8 +1,10 @@
 ﻿using event_service.DTO;
 using event_service.Interface;
+using event_service.Kafka;
 using event_service.Model;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.ObjectPool;
+using System.Collections.Generic;
 using System.Text;
 
 namespace event_service.Service
@@ -10,10 +12,14 @@ namespace event_service.Service
     public class EventService : IEventService
     {
         private readonly EventDbContext _context;
+        private readonly IParticipantsService _participantsService;
+        private readonly KafkaConsumerService _kafkaConsumerService;
 
-        public EventService(EventDbContext context)
+        public EventService(EventDbContext context, IParticipantsService participantsService, KafkaConsumerService kafkaConsumerService)
         {
             _context = context;
+            _participantsService = participantsService;
+            _kafkaConsumerService = kafkaConsumerService;
         }
 
         public async Task<EventDto> CreateEventAsync(EventDto eventDto)
@@ -108,13 +114,21 @@ namespace event_service.Service
             return currentEvent.id.ToString();
         }
 
-        public async Task<EventWithParticipantsDto> GetEventByIdAsync(int id)
+        public async Task<EventWithParticipantsDto> GetEventByIdAsync(int id, CancellationToken cancellationToken)
         {
             var eventEntity = await _context.Events.FindAsync(id);
-
             if (eventEntity == null)
             {
                 return null;
+            }
+            // gọi kafka để láy userid
+            await _participantsService.GetParticipants(eventEntity.id);
+
+            List<CustomParticipants> results = await _kafkaConsumerService.ConsumeMessagesAsync(cancellationToken, eventEntity.id.ToString());
+            // ra rồi đó m xử lý ngay đây này
+            foreach(var user in results)
+            {
+                Console.WriteLine(user.ToString());
             }
 
             return new EventWithParticipantsDto

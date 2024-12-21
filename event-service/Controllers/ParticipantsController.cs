@@ -36,5 +36,16 @@ namespace event_service.Controllers
                 Data = null
             });
         }
+        //[HttpGet("get")]
+        //public async Task<IActionResult> GetParticipants(string eventId)
+        //{
+        //    await _participantsService.GetParticipants(int.Parse(eventId.ToString()));
+        //    return Ok(new CustomData
+        //    {
+        //        Message = "Get thành công",
+        //        Success = true,
+        //        Data = null
+        //    });
+        //}
     }
 }

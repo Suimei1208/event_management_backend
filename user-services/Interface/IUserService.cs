@@ -12,6 +12,7 @@ namespace user_services.Interface
         UserDTO GetUserDetails(FirebaseToken token);
         Task<UserDTO> UpdateProfile(string name, string phone, string id);
         Task<List<CustomUser>> SearchUser(string name);
+        Task<CustomUser> GetUserDetails(string id);
 
     }
 }

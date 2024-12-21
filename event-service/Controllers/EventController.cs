@@ -136,10 +136,10 @@ namespace event_service.Controllers
         }
 
         [HttpGet("event/{id}")]
-        [Authorize]
-        public async Task<IActionResult> GetEventById(int id)
+        //[Authorize]
+        public async Task<IActionResult> GetEventById(CancellationToken cancellationToken, int id)
         {
-            var eventWithParticipants = await _eventService.GetEventByIdAsync(id);
+            var eventWithParticipants = await _eventService.GetEventByIdAsync(id, cancellationToken);
             if (eventWithParticipants == null)
             {
                 return NotFound(new CustomData

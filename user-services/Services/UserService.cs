@@ -124,7 +124,28 @@ namespace user_services.Services
             }
             return customListUser;
         }
-
+        public async Task<CustomUser> GetUserDetails(string id)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(a => a.Id == id);
+            if (user == null)
+            {
+                throw new InvalidOperationException("User not found.");
+            }
+            var customUser = new CustomUser();
+            try
+            {
+                customUser.id = user.Id;
+                customUser.name = user.Name;
+                customUser.role = user.Role;
+                customUser.avtUrl = await _firebaseAuthService.GetUserPhotoUrl(user.Id);              
+            }
+            catch (FirebaseAuthException ex)
+            {
+                Console.WriteLine(ex);
+            }
+            
+            return customUser;
+        }
 
     }
 }

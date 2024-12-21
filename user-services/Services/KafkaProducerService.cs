@@ -1,53 +1,63 @@
 ﻿using Confluent.Kafka;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
+using user_services.DTO;
 using user_services.Interface;
 
 namespace user_services.Services
 {
-    public class KafkaProducerService : IKafkaProducerService
+    public class KafkaProducerService
     {
-        private readonly IProducer<Null, string> _producer;
-        private readonly string _topic = "user-topic";
+        private readonly IProducer<string, string> _producer;
+        private readonly ILogger<KafkaProducerService> _logger;
+        private readonly string _topic;
+        private readonly IUserService _userService;
 
-        public KafkaProducerService()
+        public KafkaProducerService(IOptions<KafkaSettings> kafkaSettings, ILogger<KafkaProducerService> logger, IUserService userService)
         {
+            _logger = logger;
+
             var config = new ProducerConfig
             {
-                BootstrapServers = "broker:29092",  
-                Acks = Acks.All
+                BootstrapServers = kafkaSettings.Value.BootstrapServers
             };
 
-            _producer = new ProducerBuilder<Null, string>(config).Build();
+            _producer = new ProducerBuilder<string, string>(config).Build();
+            _topic = kafkaSettings.Value.Producer.Topic;
+            _userService = userService;
         }
 
-        public async Task SendUserProfileToKafka(string userId, string newName, string newPhone)
+        public async Task SendMessageAsync(List<UserInKafka> ListUser)
         {
-            var userProfileEvent = new
+            try
             {
-                UserId = userId,
-                NewName = newName,
-                NewPhone = newPhone
-            };
-
-            var profileMessage = JsonConvert.SerializeObject(userProfileEvent);
-            var message = new Message<Null, string> { Value = profileMessage };
-
-            await _producer.ProduceAsync(_topic, message);
+                List<UserSentKafka> userSentKafka = new List<UserSentKafka>();
+                foreach (var user in ListUser)
+                {
+                    var currentUser = new UserSentKafka
+                    {
+                        user = await _userService.GetUserDetails(user.UserId),
+                        EventID = user.EventId,
+                        Role = user.RoleInEvent
+                    };
+                    userSentKafka.Add(currentUser);
+                }
+                var message = JsonConvert.SerializeObject(userSentKafka);
+                var result = await _producer.ProduceAsync(_topic, new Message<string, string> { 
+                    Key = userSentKafka[0].EventID.ToString(),  
+                    Value = message 
+                });
+                _logger.LogInformation($"Message sent to {_topic} at offset {result.Offset}");
+            }
+            catch (ProduceException<Ignore, string> ex)
+            {
+                _logger.LogError($"Error sending message: {ex.Error.Reason}");
+            }
         }
 
-        public async Task SendUserRoleToKafka(string userId, string newRole)
+        public void Dispose()
         {
-            var userRoleEvent = new 
-            {
-                UserId = userId,
-                NewRole = newRole
-            };
-
-            var eventMessage = JsonConvert.SerializeObject(userRoleEvent);
-            var message = new Message<Null, string> { Value = eventMessage };
-
-            await _producer.ProduceAsync(_topic, message);
+            _producer.Dispose();
         }
     }
-
 }

@@ -13,6 +13,7 @@ using FirebaseAdmin.Auth;
 using Microsoft.Extensions.Options;
 using System.Security.Claims;
 using Newtonsoft.Json.Linq;
+using user_services.DTO;
 
 namespace user_services
 {
@@ -22,6 +23,9 @@ namespace user_services
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            builder.Services.Configure<KafkaSettings>(builder.Configuration.GetSection("Kafka"));
+            builder.Services.AddHostedService<KafkaConsumerService>();
+            builder.Services.AddScoped<KafkaProducerService>();
             builder.Services.AddSingleton<FirebaseApp>(provider =>
             {
                 return FirebaseApp.Create(new AppOptions()
@@ -87,7 +91,6 @@ namespace user_services
                 });
 
             builder.Services.AddSingleton<IFirebaseAuthService, FirebaseAuthService>();
-
             builder.Services.AddDbContext<UserDbContext>(options =>
                options.UseMySql(
                    builder.Configuration.GetConnectionString("DefaultConnection"),
@@ -96,7 +99,6 @@ namespace user_services
            );
             builder.Services.AddScoped<JwtService>();
             builder.Services.AddScoped<IUserService, UserService>();
-            builder.Services.AddScoped<IKafkaProducerService, KafkaProducerService>();
             // Cấu hình các dịch vụ liên quan đến API
             builder.Services.AddControllers();
             builder.Services.AddAuthorization();
