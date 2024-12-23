@@ -146,6 +146,57 @@ namespace event_service.Service
                 Participants = eventEntity.Participants?.Select(ParticipantsMapper.ToDto).ToList() ?? new List<ParticipantsDto>()
             };
         }
+
+        public async Task<List<EventDto>> GetEventHomePage(string uid, string role)
+        {
+            DateTime currentDateTime = DateTime.Now;
+
+            HashSet<int> addedEventIds = new HashSet<int>();
+            List<EventDto> listEvent = new List<EventDto>();
+
+            if (role == "Organizer")
+            {
+                var list = await GetEventAsync(uid);
+                if (list != null)
+                {
+                    foreach (var item in list)
+                    {
+                        if (currentDateTime <= item.StartDate &&  addedEventIds.Add(item.id))
+                        {
+                            Console.WriteLine($"StartDate: {item.StartDate}, currentDateTime: {currentDateTime}");
+                            listEvent.Add(item);
+                        }
+                    }
+                }
+            }
+
+            var userRegisterEvent = await _context.Participants.Where(u => u.userId == uid).ToListAsync();
+            if (userRegisterEvent == null || !userRegisterEvent.Any())
+            {
+                return null;
+            }
+
+            foreach (var participant in userRegisterEvent)
+            {
+                var eventItem = await _context.Events.FindAsync(participant.eventId);
+                if (eventItem != null)
+                {
+                    if (currentDateTime <= eventItem.StartDate && addedEventIds.Add(eventItem.id))
+                    {
+                        Console.WriteLine($"StartDate: {eventItem.StartDate}, currentDateTime: {currentDateTime}");
+
+                        listEvent.Add(EventMapper.ToDto(eventItem));
+                    }
+                }
+            }
+
+            return listEvent.OrderBy(e => Math.Abs((e.StartDate - DateTime.Now).TotalMilliseconds))
+            .ToList(); ;
+        }
+
+
+
     }
+
 
 }
