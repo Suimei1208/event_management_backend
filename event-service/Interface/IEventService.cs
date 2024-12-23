@@ -12,6 +12,6 @@ namespace event_service.Interface
         Task<bool> DeleteEventAsync(int id);
         Task<string> GetIdEvent(string idCreate, string name);
         Task<EventWithParticipantsDto> GetEventByIdAsync(int id, CancellationToken cancellationToken);
-
+        Task<List<EventDto>> GetEventHomePage(string uid, string role);
     }
 }

@@ -136,7 +136,7 @@ namespace event_service.Controllers
         }
 
         [HttpGet("event/{id}")]
-        //[Authorize]
+        [Authorize]
         public async Task<IActionResult> GetEventById(CancellationToken cancellationToken, int id)
         {
             var eventWithParticipants = await _eventService.GetEventByIdAsync(id, cancellationToken);
@@ -155,6 +155,28 @@ namespace event_service.Controllers
                 Success = true,
                 Message = "Event retrieved successfully",
                 Data = eventWithParticipants
+            });
+        }
+
+        [HttpGet("get-register-event")]
+        [Authorize]
+        public async Task<IActionResult> GetEventHomePage(string uid, string role)
+        {
+            var result = await _eventService.GetEventHomePage(uid, role);
+            if (result == null)
+            {
+                return NotFound(new CustomData
+                {
+                    Success = false,
+                    Message = "No events register",
+                    Data = null
+                });
+            }
+            return Ok(new CustomData
+            {
+                Success = true,
+                Message = "Fetch successfully",
+                Data = result
             });
         }
 
