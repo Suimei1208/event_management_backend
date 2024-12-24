@@ -95,20 +95,22 @@ namespace event_service.Controllers
 
         // Chỉnh sửa sự kiện
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateEvent(int id, EventDto eventDto)
+        public async Task<IActionResult> UpdateEvent(int id, [FromBody] EventWithParticipantsDto eventDto)
         {
             var updated = await _eventService.UpdateEventAsync(id, eventDto);
             if (!updated)
             {
                 return NotFound();
             }
+
             return Ok(new CustomData
             {
                 Success = true,
                 Message = "Edit done",
-                Data = NoContent()
-            }) ;
+                Data = updated,
+            });
         }
+
 
         // Xóa sự kiện
         [Authorize]
@@ -137,26 +139,40 @@ namespace event_service.Controllers
 
         [HttpGet("event/{id}")]
         [Authorize]
-        public async Task<IActionResult> GetEventById(CancellationToken cancellationToken, int id)
+        public async Task<IActionResult> GetEventById(int id)
         {
-            var eventWithParticipants = await _eventService.GetEventByIdAsync(id, cancellationToken);
-            if (eventWithParticipants == null)
+            try
             {
-                return NotFound(new CustomData
+                var eventWithParticipants = await _eventService.GetEventByIdAsync(id);
+
+                if (eventWithParticipants == null)
+                {
+                    return NotFound(new CustomData
+                    {
+                        Success = false,
+                        Message = "Event not found",
+                        Data = null
+                    });
+                }
+
+                return Ok(new CustomData
+                {
+                    Success = true,
+                    Message = "Event retrieved successfully",
+                    Data = eventWithParticipants
+                });
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, new CustomData
                 {
                     Success = false,
-                    Message = "Event not found",
+                    Message = "An internal error occurred. Please try again later.",
                     Data = null
                 });
             }
-
-            return Ok(new CustomData
-            {
-                Success = true,
-                Message = "Event retrieved successfully",
-                Data = eventWithParticipants
-            });
         }
+
 
         [HttpGet("get-register-event")]
         [Authorize]
@@ -177,6 +193,94 @@ namespace event_service.Controllers
                 Success = true,
                 Message = "Fetch successfully",
                 Data = result
+            });
+        }
+
+        // Create a schedule for an event
+        [HttpPost("event/{eventId}/create-schedule")]
+        [Authorize]
+        public async Task<ActionResult<CustomData>> CreateSchedule(int eventId, [FromBody] ScheduleDto scheduleDto)
+        {
+            if (scheduleDto == null)
+            {
+                return BadRequest(new CustomData
+                {
+                    Success = false,
+                    Message = "Invalid input data",
+                    Data = null
+                });
+            }
+
+            var schedule = await _eventService.CreateScheduleAsync(eventId, scheduleDto);
+
+            return Ok(new CustomData
+            {
+                Success = true,
+                Message = "Schedule created successfully",
+                Data = schedule
+            });
+        }
+
+        // Get schedules for an event
+        [HttpGet("event/{eventId}/schedules")]
+        [Authorize]
+        public async Task<ActionResult<CustomData>> GetSchedulesForEvent(int eventId)
+        {
+            var schedules = await _eventService.GetSchedulesForEventAsync(eventId);
+
+            return Ok(new CustomData
+            {
+                Success = true,
+                Message = "Schedules fetched successfully",
+                Data = schedules
+            });
+        }
+
+        // Update a schedule
+        [HttpPut("event/{scheduleId}/schedules")]
+        [Authorize]
+        public async Task<ActionResult<CustomData>> UpdateSchedule(int scheduleId, [FromBody] ScheduleDto scheduleDto)
+        {
+            var updated = await _eventService.UpdateScheduleAsync(scheduleId, scheduleDto);
+            if (!updated)
+            {
+                return NotFound(new CustomData
+                {
+                    Success = false,
+                    Message = "Schedule not found",
+                    Data = null
+                });
+            }
+
+            return Ok(new CustomData
+            {
+                Success = true,
+                Message = "Schedule updated successfully",
+                Data = updated
+            });
+        }
+
+        // Delete a schedule
+        [HttpDelete("schedule/{scheduleId}")]
+        [Authorize]
+        public async Task<ActionResult<CustomData>> DeleteSchedule(int scheduleId)
+        {
+            var deleted = await _eventService.DeleteScheduleAsync(scheduleId);
+            if (!deleted)
+            {
+                return NotFound(new CustomData
+                {
+                    Success = false,
+                    Message = "Schedule not found",
+                    Data = null
+                });
+            }
+
+            return Ok(new CustomData
+            {
+                Success = true,
+                Message = "Schedule deleted successfully",
+                Data = null
             });
         }
 

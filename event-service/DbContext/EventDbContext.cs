@@ -1,4 +1,5 @@
 ﻿using event_service.Model;
+using Google.Api.Gax;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -10,6 +11,7 @@ namespace event_service
         
         public DbSet<Events> Events { get; set; }
         public DbSet<Participants> Participants { get; set; }
+        public DbSet<Event_Schedules> Schedules { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
