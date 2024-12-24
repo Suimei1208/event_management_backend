@@ -2,6 +2,7 @@
 using event_service.Interface;
 using event_service.Kafka;
 using event_service.Model;
+using Google.Api.Gax;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.ObjectPool;
 using System.Collections.Generic;
@@ -63,7 +64,7 @@ namespace event_service.Service
         }
 
         // Chỉnh sửa sự kiện
-        public async Task<bool> UpdateEventAsync(int id, EventDto eventDto)
+        public async Task<bool> UpdateEventAsync(int id, EventWithParticipantsDto eventDto)
         {
             var eventItem = await _context.Events.FindAsync(id);
             if (eventItem == null)
@@ -71,14 +72,30 @@ namespace event_service.Service
                 return false;
             }
 
-            eventItem.Name = eventDto.Name;
-            eventItem.Description = eventDto.Description;
+            eventItem.Name = eventDto.Name ?? "error name";
+            eventItem.Description = eventDto.Description ?? "error desc";
             eventItem.StartDate = eventDto.StartDate;
             eventItem.EndDate = eventDto.EndDate;
-            eventItem.Location = eventDto.Location;
-            eventItem.TargetAudience = eventDto.TargetAudience;
-            eventItem.type = eventDto.type;
-            eventItem.Banner = eventDto.Banner;
+            eventItem.Location = eventDto.Location ?? "error loca";
+            eventItem.TargetAudience = eventDto.TargetAudience ?? "error obj";
+            eventItem.type = eventDto.Type ?? "Seminar";
+            eventItem.Banner = eventDto.Banner ?? "";
+
+            if (eventDto.Participants != null)
+            {
+                foreach (var participantDto in eventDto.Participants)
+                {
+                    var newParticipant = new Participants
+                    {
+                        userId = participantDto.userId,
+                        eventId = id,
+                        status = participantDto.status,
+                        role = participantDto.role,
+                        registration_Date = participantDto.registration_Date,
+                    };
+                    eventItem.Participants.Add(newParticipant);
+                }
+            }
 
             _context.Entry(eventItem).State = EntityState.Modified;
             await _context.SaveChangesAsync();
@@ -114,38 +131,42 @@ namespace event_service.Service
             return currentEvent.id.ToString();
         }
 
-        public async Task<EventWithParticipantsDto> GetEventByIdAsync(int id, CancellationToken cancellationToken)
+        public async Task<EventWithParticipantsDto> GetEventByIdAsync(int id)
         {
-            var eventEntity = await _context.Events.FindAsync(id);
-            if (eventEntity == null)
+            try
             {
-                return null;
-            }
-            // gọi kafka để láy userid
-            await _participantsService.GetParticipants(eventEntity.id);
+                var eventEntity = await _context.Events
+                    .Include(e => e.Participants)
+                    .FirstOrDefaultAsync(e => e.id == id);
 
-            List<CustomParticipants> results = await _kafkaConsumerService.ConsumeMessagesAsync(cancellationToken, eventEntity.id.ToString());
-            // ra rồi đó m xử lý ngay đây này
-            foreach(var user in results)
-            {
-                Console.WriteLine(user.ToString());
-            }
+                if (eventEntity == null)
+                {
+                    return null;
+                }
 
-            return new EventWithParticipantsDto
+                return new EventWithParticipantsDto
+                {
+                    Id = eventEntity.id,
+                    Name = eventEntity.Name,
+                    Description = eventEntity.Description,
+                    StartDate = eventEntity.StartDate,
+                    EndDate = eventEntity.EndDate,
+                    Location = eventEntity.Location,
+                    TargetAudience = eventEntity.TargetAudience,
+                    Status = eventEntity.Status,
+                    Type = eventEntity.type,
+                    Banner = eventEntity.Banner,
+                    Participants = eventEntity.Participants?
+                        .Select(ParticipantsMapper.ToDto)
+                        .ToList() ?? new List<ParticipantsDto>()
+                };
+            }
+            catch (Exception)
             {
-                Id = eventEntity.id,
-                Name = eventEntity.Name,
-                Description = eventEntity.Description,
-                StartDate = eventEntity.StartDate,
-                EndDate = eventEntity.EndDate,
-                Location = eventEntity.Location,
-                TargetAudience = eventEntity.TargetAudience,
-                Status = eventEntity.Status,
-                Type = eventEntity.type,
-                Banner = eventEntity.Banner,
-                Participants = eventEntity.Participants?.Select(ParticipantsMapper.ToDto).ToList() ?? new List<ParticipantsDto>()
-            };
+                throw;
+            }
         }
+
 
         public async Task<List<EventDto>> GetEventHomePage(string uid, string role)
         {
@@ -194,9 +215,83 @@ namespace event_service.Service
             .ToList(); ;
         }
 
+        public async Task<ScheduleDto> CreateScheduleAsync(int eventId, ScheduleDto scheduleDto)
+        {
+            var eventItem = await _context.Events.FindAsync(eventId);
+            if (eventItem == null)
+            {
+                throw new Exception("Event not found");
+            }
 
+            var schedule = new Event_Schedules
+            {
+                EventId = eventId,
+                Time = scheduleDto.Time,
+                Title = scheduleDto.Title,
+                Location = scheduleDto.Location
+            };
 
+            _context.Schedules.Add(schedule);
+            await _context.SaveChangesAsync();
+
+            return new ScheduleDto
+            {
+                Id = schedule.Id,
+                Time = schedule.Time,
+                Title = schedule.Title,
+                Location = schedule.Location
+            };
+        }
+
+        // Get schedules for a specific event
+        public async Task<List<ScheduleDto>> GetSchedulesForEventAsync(int eventId)
+        {
+            var schedules = await _context.Schedules
+                .Where(s => s.EventId == eventId)
+                .OrderBy(s => s.Time)
+                .ToListAsync();
+
+            return schedules.Select(s => new ScheduleDto
+            {
+                Id = s.Id,
+                Time = s.Time,
+                Title = s.Title,
+                Location = s.Location
+            }).ToList();
+        }
+
+        // Update a schedule
+        public async Task<bool> UpdateScheduleAsync(int scheduleId, ScheduleDto scheduleDto)
+        {
+            var schedule = await _context.Schedules.FindAsync(scheduleId);
+            if (schedule == null)
+            {
+                return false;
+            }
+
+            schedule.Time = scheduleDto.Time;
+            schedule.Title = scheduleDto.Title;
+            schedule.Location = scheduleDto.Location;
+
+            _context.Entry(schedule).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+
+            return true;
+        }
+
+        // Delete a schedule
+        public async Task<bool> DeleteScheduleAsync(int scheduleId)
+        {
+            var schedule = await _context.Schedules.FindAsync(scheduleId);
+            if (schedule == null)
+            {
+                return false;
+            }
+
+            _context.Schedules.Remove(schedule);
+            await _context.SaveChangesAsync();
+
+            return true;
+        }
     }
-
-
 }

@@ -200,5 +200,49 @@ namespace user_services.Controllers
             }
         }
 
+        [HttpGet("GetUserById")]
+        [Authorize]
+        public async Task<IActionResult> GetUserById(string userId)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return BadRequest(new CustomData
+                    {
+                        Message = "User ID is required",
+                        Success = false
+                    });
+                }
+
+                var user = await _userService.GetUserDetails(userId);
+
+                if (user == null)
+                {
+                    return NotFound(new CustomData
+                    {
+                        Message = "User not found",
+                        Success = false
+                    });
+                }
+
+                return Ok(new CustomData
+                {
+                    Message = "User details fetched successfully",
+                    Success = true,
+                    Data = user
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new CustomData
+                {
+                    Message = $"Internal server error: {ex.Message}",
+                    Success = false
+                });
+            }
+        }
+
+
     }
 }
