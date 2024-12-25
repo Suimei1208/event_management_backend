@@ -30,5 +30,48 @@ namespace event_service.Service
             var participantsDtos = participants.Select(p => p.ToDto()).ToList();
             await _kafkaProducerService.SendMessageAsync(participantsDtos);
         }
+
+        public async Task<List<object>> getEventRegisterPending(string uid)
+        {
+            if (string.IsNullOrEmpty(uid))
+            {
+                return null;
+            }
+
+            List<object> result = new List<object>();
+
+            try
+            {
+                var list = await _context.Participants.Where(u => u.userId == uid.ToString()).ToArrayAsync();
+
+                if (list.Length == 0)
+                {
+                    return result;
+                }
+
+                foreach (var i in list)
+                {
+                    result.Add(new
+                    {
+                        id = i.eventId.ToString(),
+                        status = i.status.ToString()
+                    });
+                }
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex.Message}");
+                return null;
+            }
+        }
+
+        public async Task UnregisterEvent(string eventid, string uid) {
+            var result = _context.Participants.FirstOrDefault(u => u.userId == uid && u.eventId == int.Parse(eventid));
+            _context.Participants.Remove(result);
+            await _context.SaveChangesAsync();
+        }
+
     }
 }

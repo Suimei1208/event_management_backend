@@ -36,16 +36,29 @@ namespace event_service.Controllers
                 Data = null
             });
         }
-        //[HttpGet("get")]
-        //public async Task<IActionResult> GetParticipants(string eventId)
-        //{
-        //    await _participantsService.GetParticipants(int.Parse(eventId.ToString()));
-        //    return Ok(new CustomData
-        //    {
-        //        Message = "Get thành công",
-        //        Success = true,
-        //        Data = null
-        //    });
-        //}
+        [HttpGet("get-event-register-pending")]
+        [Authorize]
+        public async Task<IActionResult> GetEventParticipantsRegisterStatus(string uid)
+        {
+            var result = await _participantsService.getEventRegisterPending(uid);
+            return Ok(new CustomData
+            {
+                Message = "Get thành công",
+                Success = true,
+                Data = result
+            });
+        }
+        
+        [HttpDelete("participants/unregister")]
+        public async Task<IActionResult> unregister(string uid, string eventid)
+        {
+            await _participantsService.UnregisterEvent(eventid, uid);
+            return Ok(new CustomData
+            {
+                Message = "Get thành công",
+                Success = true,
+                Data = null
+            });
+        }
     }
 }

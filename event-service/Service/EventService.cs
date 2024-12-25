@@ -52,6 +52,28 @@ namespace event_service.Service
             }
             return eventItems.Select(EventMapper.ToDto).ToList();
         }
+        public async Task<List<EventDto>> GetEventStatus(string status)
+        {
+            if (string.IsNullOrWhiteSpace(status))
+            {
+                throw new ArgumentException("Status cannot be null or empty.", nameof(status));
+            }
+
+            try
+            {
+                var events = await _context.Events
+                                           .Where(e => e.Status == status)
+                                           .ToListAsync();
+
+                return events?.Any() == true ? EventMapper.ToDtoList(events) : new List<EventDto>();
+            }
+            catch (Exception ex)
+            {
+                // Log the exception here if logging is set up
+                throw new Exception("An error occurred while retrieving event statuses.", ex);
+            }
+        }
+
 
         // Lọc sự kiện theo loại hình
         public async Task<IEnumerable<EventDto>> GetEventsByCategoryAsync(string category)
@@ -293,5 +315,8 @@ namespace event_service.Service
 
             return true;
         }
+
+        
+
     }
 }

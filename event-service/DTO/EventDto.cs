@@ -1,4 +1,5 @@
 ﻿using event_service.Model;
+using Microsoft.Extensions.Logging;
 
 namespace event_service.DTO
 {
@@ -52,6 +53,12 @@ namespace event_service.DTO
                 Status = eventDto.status,
                 Banner = eventDto.Banner
             };
+        }
+        public static List<EventDto> ToDtoList(List<Events> events)
+        {
+            if (events == null) return new List<EventDto>();
+
+            return events.Select(ToDto).ToList();
         }
     }
 
