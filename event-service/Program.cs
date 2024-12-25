@@ -1,10 +1,11 @@
-using event_service.Interface;
+﻿using event_service.Interface;
 using event_service.Kafka;
 using event_service.Middleware;
 using event_service.Model;
 using event_service.Service;
 using FirebaseAdmin;
 using FirebaseAdmin.Auth;
+using FirebaseAdmin.Messaging;
 using Google.Apis.Auth.OAuth2;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -22,11 +23,22 @@ namespace event_service
 
             builder.Services.AddSingleton<FirebaseApp>(provider =>
             {
-                return FirebaseApp.Create(new AppOptions()
+                try
                 {
-                    Credential = GoogleCredential.FromFile("firebase-credentials.json")
-                });
+                    var firebaseApp = FirebaseApp.Create(new AppOptions()
+                    {
+                        Credential = GoogleCredential.FromFile("firebase-credentials.json")
+                    });
+                    Console.WriteLine("FirebaseApp đã được khởi tạo thành công.");
+                    return firebaseApp;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Lỗi khi khởi tạo FirebaseApp: {ex.Message}");
+                    throw;  // Ném lại ngoại lệ để dừng khởi động ứng dụng nếu có lỗi
+                }
             });
+
             // Add services to the container.
             builder.Services.AddDbContext<EventDbContext>(options =>
                options.UseMySql(
@@ -103,6 +115,7 @@ namespace event_service
             builder.Services.AddSwaggerGen();
             builder.Services.AddScoped<IEventService, EventService>();
             builder.Services.AddScoped<IParticipantsService, ParticipantsService>();
+            builder.Services.AddScoped<INotification, Notification_service>();
             builder.Services.AddScoped<KafkaConsumerService>();
 
             var app = builder.Build();

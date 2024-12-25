@@ -17,5 +17,6 @@ namespace event_service.Interface
         Task<List<ScheduleDto>> GetSchedulesForEventAsync(int eventId);
         Task<bool> UpdateScheduleAsync(int scheduleId, ScheduleDto scheduleDto);
         Task<bool> DeleteScheduleAsync(int scheduleId);
+        Task<List<EventDto>> GetEventStatus(string status);
     }
 }

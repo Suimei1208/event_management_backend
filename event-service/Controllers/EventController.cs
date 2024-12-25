@@ -1,5 +1,6 @@
 ﻿using event_service.DTO;
 using event_service.Interface;
+using event_service.Service;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -11,10 +12,12 @@ namespace event_service.Controllers
     public class EventController : ControllerBase
     {
         private readonly IEventService _eventService;
+        private readonly INotification _notification;
 
-        public EventController(IEventService eventService)
+        public EventController(IEventService eventService, INotification notification)
         {
             _eventService = eventService;
+            _notification = notification;
         }
         [HttpGet("getid")]
         [Authorize]
@@ -283,6 +286,30 @@ namespace event_service.Controllers
                 Data = null
             });
         }
+       [HttpPost("notification")]
+        [Authorize]
+        public async Task<IActionResult> SendNotification(string topic, string title, string body)
+        {
+            var result = await _notification.SendNotification(title,body,topic);
+            return Ok(new CustomData
+            {
+                Success = true,
+                Message = "sent successfully",
+                Data = result
+            }); 
+        }
 
+        [HttpGet("event/can-register")]
+        //[Authorize]
+        public async Task<IActionResult> getEventCanRegister()
+        {
+            var listEvent = await _eventService.GetEventStatus("Upcoming");
+            return Ok(new CustomData
+            {
+                Success = true,
+                Message = "successfully",
+                Data = listEvent
+            }); 
+        }
     }
 }
