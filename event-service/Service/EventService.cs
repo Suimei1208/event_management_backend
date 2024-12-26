@@ -3,9 +3,11 @@ using event_service.Interface;
 using event_service.Kafka;
 using event_service.Model;
 using Google.Api.Gax;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.ObjectPool;
 using System.Collections.Generic;
+using System.Data;
 using System.Text;
 
 namespace event_service.Service
@@ -102,22 +104,6 @@ namespace event_service.Service
             eventItem.TargetAudience = eventDto.TargetAudience ?? "error obj";
             eventItem.type = eventDto.Type ?? "Seminar";
             eventItem.Banner = eventDto.Banner ?? "";
-
-            if (eventDto.Participants != null)
-            {
-                foreach (var participantDto in eventDto.Participants)
-                {
-                    var newParticipant = new Participants
-                    {
-                        userId = participantDto.userId,
-                        eventId = id,
-                        status = participantDto.status,
-                        role = participantDto.role,
-                        registration_Date = participantDto.registration_Date,
-                    };
-                    eventItem.Participants.Add(newParticipant);
-                }
-            }
 
             _context.Entry(eventItem).State = EntityState.Modified;
             await _context.SaveChangesAsync();
@@ -316,7 +302,94 @@ namespace event_service.Service
             return true;
         }
 
+        public async Task<List<ParticipantsDto>> GetParticipantsByEventIdAndRoleAsync(int eventId, string role)
+        {
+            if (string.IsNullOrWhiteSpace(role))
+            {
+                throw new ArgumentException("Role cannot be null or empty.", nameof(role));
+            }
+
+            try
+            {
+                var participants = await _context.Participants
+                    .Where(p => p.eventId == eventId && p.role == role)
+                    .ToListAsync();
+
+                if (participants == null || !participants.Any())
+                {
+                    return new List<ParticipantsDto>();
+                }
+
+                return participants.Select(ParticipantsMapper.ToDto).ToList();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("An error occurred while fetching participants.", ex);
+            }
+        }
+
+        public async Task<List<ParticipantsDto>> GetPendingParticipantsAsync(int eventId)
+        {
+            try
+            {
+                var participants = await _context.Participants
+                    .Where(p => p.eventId == eventId && p.status == "Pending")
+                    .ToListAsync();
+
+                if (participants == null || !participants.Any())
+                {
+                    return new List<ParticipantsDto>();
+                }
+
+                return participants.Select(ParticipantsMapper.ToDto).ToList();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("An error occurred while fetching participants.", ex);
+            }
+        }
+
+        public async Task<bool> DeleteParticipantAsync(int eventId, int participantId, string role)
+        {
+            try
+            {
+                var participant = await _context.Participants
+                    .Where(p => p.eventId == eventId && p.id == participantId && p.role == role)
+                    .FirstOrDefaultAsync();
+
+                if (participant == null)
+                {
+                    return false;
+                }
+
+                _context.Participants.Remove(participant);
+                await _context.SaveChangesAsync();
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("An error occurred while deleting the participant.", ex);
+            }
+        }
+
         
 
+        public async Task<bool> ApproveParticipantAsync(int eventId, int participantId)
+        {
+            var participant = await _context.Participants
+                .FirstOrDefaultAsync(p => p.eventId == eventId && p.id == participantId && p.status == "Pending");
+
+            if (participant == null)
+            {
+                return false;
+            }
+
+            participant.status = "Approved";
+            _context.Participants.Update(participant);
+            await _context.SaveChangesAsync();
+
+            return true;
+        }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using event_service.DTO;
+using Microsoft.AspNetCore.Mvc;
 
 namespace event_service.Interface
 {
@@ -18,5 +19,9 @@ namespace event_service.Interface
         Task<bool> UpdateScheduleAsync(int scheduleId, ScheduleDto scheduleDto);
         Task<bool> DeleteScheduleAsync(int scheduleId);
         Task<List<EventDto>> GetEventStatus(string status);
+        Task<List<ParticipantsDto>> GetParticipantsByEventIdAndRoleAsync(int eventId, string role);
+        Task<bool> DeleteParticipantAsync(int eventId, int participantId, string role);
+        Task<List<ParticipantsDto>> GetPendingParticipantsAsync(int eventId);
+        Task<bool> ApproveParticipantAsync(int eventId, int participantId);
     }
 }

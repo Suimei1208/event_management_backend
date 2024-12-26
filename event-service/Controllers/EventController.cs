@@ -4,6 +4,7 @@ using event_service.Service;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using System.Data;
 using System.Security.Claims;
 using user_services.JsonData;
 
@@ -310,6 +311,137 @@ namespace event_service.Controllers
                 Message = "successfully",
                 Data = listEvent
             }); 
+        }
+
+        [HttpGet("event/{eventId}/participants/{role}")]
+        [Authorize]
+        public async Task<IActionResult> GetParticipantsByEventIdAndRole(int eventId, string role)
+        {
+            try
+            {
+                var participants = await _eventService.GetParticipantsByEventIdAndRoleAsync(eventId, role);
+
+                if (participants == null || !participants.Any())
+                {
+                    return NotFound(new CustomData
+                    {
+                        Success = false,
+                        Message = "No participants found for the given event and role",
+                        Data = null
+                    });
+                }
+
+                return Ok(new CustomData
+                {
+                    Success = true,
+                    Message = "Participants fetched successfully",
+                    Data = participants
+                });
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, new CustomData
+                {
+                    Success = false,
+                    Message = "An internal error occurred. Please try again later.",
+                    Data = null
+                });
+            }
+        }
+
+        [HttpDelete("event/{eventId}/participants/{participantId}/role/{role}")]
+        [Authorize]
+        public async Task<IActionResult> DeleteParticipant(int eventId, int participantId, string role)
+        {
+            try
+            {
+                var result = await _eventService.DeleteParticipantAsync(eventId, participantId, role);
+
+                if (!result)
+                {
+                    return NotFound(new CustomData
+                    {
+                        Success = false,
+                        Message = "Participant not found or couldn't be deleted.",
+                        Data = null
+                    });
+                }
+
+                return Ok(new CustomData
+                {
+                    Success = true,
+                    Message = "Participant deleted successfully.",
+                    Data = null
+                });
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, new CustomData
+                {
+                    Success = false,
+                    Message = "An internal error occurred while deleting the participant. Please try again later.",
+                    Data = null
+                });
+            }
+        }
+
+        [HttpGet("event/{eventId}/participants/pending")]
+        [Authorize]
+        public async Task<IActionResult> GetPendingParticipants(int eventId)
+        {
+            try
+            {
+                var participants = await _eventService.GetPendingParticipantsAsync(eventId);
+
+                if (participants == null)
+                {
+                    return NotFound(new CustomData
+                    {
+                        Success = false,
+                        Message = "No pending participants found for the given event",
+                        Data = null
+                    });
+                }
+
+                return Ok(new CustomData
+                {
+                    Success = true,
+                    Message = "Participants fetched successfully",
+                    Data = participants
+                });
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, new CustomData
+                {
+                    Success = false,
+                    Message = "An internal error occurred. Please try again later.",
+                    Data = null
+                });
+            }
+        }
+
+        [HttpPut("event/{eventId}/participants/{participantId}/approve")]
+        [Authorize]
+        public async Task<IActionResult> ApproveParticipant(int eventId, int participantId)
+        {
+            var result = await _eventService.ApproveParticipantAsync(eventId, participantId);
+            if (!result)
+            {
+                return NotFound(new CustomData
+                {
+                    Success = false,
+                    Message = "Participant not found or already approved",
+                    Data = null
+                });
+            }
+
+            return Ok(new CustomData
+            {
+                Success = true,
+                Message = "Participant approved successfully",
+                Data = null
+            });
         }
     }
 }
