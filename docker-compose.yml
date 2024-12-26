@@ -36,6 +36,16 @@ services:
     networks:
       - backend
 
+  ticket-service:
+    image: ${DOCKER_REGISTRY-}ticketservice
+    build:
+      context: .
+      dockerfile: ticket-service/Dockerfile
+    ports:
+      - "5002:5002"
+    networks:
+      - backend
+
   zookeeper:
     image: confluentinc/cp-zookeeper:7.7.0
     hostname: zookeeper
@@ -104,6 +114,7 @@ services:
     depends_on:
       - event-service  
       - user-services
+      - ticket-service
     networks:
       - backend
     volumes:

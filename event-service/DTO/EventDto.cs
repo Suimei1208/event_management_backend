@@ -16,6 +16,7 @@ namespace event_service.DTO
         public string Banner {  get; set; }
         public string status { get; set; }
         public string type { get; set; }
+        public int eventCode { get; set; }
     }
     public static class EventMapper
     {
@@ -33,7 +34,8 @@ namespace event_service.DTO
                 TargetAudience = eventEntity.TargetAudience,
                 type = eventEntity.type,
                 status = eventEntity.Status,
-                Banner = eventEntity.Banner
+                Banner = eventEntity.Banner,
+                eventCode = eventEntity.eventCode
             };
         }
 
@@ -51,7 +53,8 @@ namespace event_service.DTO
                 TargetAudience = eventDto.TargetAudience,
                 type = eventDto.type,
                 Status = eventDto.status,
-                Banner = eventDto.Banner
+                Banner = eventDto.Banner,
+                eventCode = eventDto.eventCode
             };
         }
         public static List<EventDto> ToDtoList(List<Events> events)

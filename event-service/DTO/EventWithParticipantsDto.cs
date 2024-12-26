@@ -14,6 +14,7 @@ namespace event_service.DTO
         public string Status { get; set; }
         public string Type { get; set; }
         public string Banner { get; set; }
+        public int eventCode { get; set; }
 
         public List<ParticipantsDto> Participants { get; set; }
     }
