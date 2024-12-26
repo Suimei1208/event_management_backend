@@ -2,6 +2,7 @@
 using event_service.DTO;
 using event_service.Interface;
 using FirebaseAdmin;
+using FirebaseAdmin.Auth;
 using FirebaseAdmin.Messaging;
 
 namespace event_service.Service
@@ -36,7 +37,7 @@ namespace event_service.Service
             var response = await FirebaseMessaging.DefaultInstance.SendAsync(message);
             Console.WriteLine("Successfully sent message: " + response);
             return response;
-        }
+        }    
 
     }
 }

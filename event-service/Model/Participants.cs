@@ -17,6 +17,7 @@ namespace event_service.Model
         public DateTime registration_Date { get; set; }
         public string status { get; set; }
         public string role {  get; set; }
+        public bool EmailSent { get; set; } = false;
 
         public Events Event { get; set; }
     }

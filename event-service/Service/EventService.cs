@@ -164,6 +164,7 @@ namespace event_service.Service
                     Status = eventEntity.Status,
                     Type = eventEntity.type,
                     Banner = eventEntity.Banner,
+                    eventCode = eventEntity.eventCode,
                     Participants = eventEntity.Participants?
                         .Select(ParticipantsMapper.ToDto)
                         .ToList() ?? new List<ParticipantsDto>()

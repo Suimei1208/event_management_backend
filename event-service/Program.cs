@@ -1,4 +1,5 @@
-﻿using event_service.Interface;
+﻿using E_commerce_Back_end.OPT;
+using event_service.Interface;
 using event_service.Kafka;
 using event_service.Middleware;
 using event_service.Model;
@@ -20,6 +21,16 @@ namespace event_service
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+            builder.Services.AddHostedService<EventStatusUpdater>();
+            builder.Services.AddHostedService<sentEmail>();
+            builder.Services.AddScoped<IEmailService, EmailService>();
+            builder.Services.AddScoped<FirebaseService>();
+
+            builder.Services.AddSingleton<FirebaseAuth>(provider =>
+            {
+                var firebaseApp = provider.GetRequiredService<FirebaseApp>();
+                return FirebaseAuth.GetAuth(firebaseApp);
+            });
 
             builder.Services.AddSingleton<FirebaseApp>(provider =>
             {
@@ -38,7 +49,6 @@ namespace event_service
                     throw;  // Ném lại ngoại lệ để dừng khởi động ứng dụng nếu có lỗi
                 }
             });
-
             // Add services to the container.
             builder.Services.AddDbContext<EventDbContext>(options =>
                options.UseMySql(
