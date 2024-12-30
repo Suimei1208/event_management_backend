@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using event_service;
 
@@ -11,9 +12,11 @@ using event_service;
 namespace event_service.Migrations
 {
     [DbContext(typeof(EventDbContext))]
-    partial class EventDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241227104315_AddAccessColumn")]
+    partial class AddAccessColumn
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -94,9 +97,6 @@ namespace event_service.Migrations
                     b.Property<bool>("access")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<bool>("allowSelectSchedule")
-                        .HasColumnType("tinyint(1)");
-
                     b.Property<int>("eventCode")
                         .HasColumnType("int");
 
@@ -143,34 +143,6 @@ namespace event_service.Migrations
                     b.HasIndex("eventId");
 
                     b.ToTable("Participants");
-                });
-
-            modelBuilder.Entity("event_service.Model.Schedule_Participants", b =>
-                {
-                    b.Property<int>("id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("id"));
-
-                    b.Property<string>("role")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<int>("scheduleId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("status")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("userId")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.HasKey("id");
-
-                    b.ToTable("Schedule_Participants");
                 });
 
             modelBuilder.Entity("event_service.Model.Participants", b =>

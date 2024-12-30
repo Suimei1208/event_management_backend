@@ -35,37 +35,32 @@ namespace event_service.Service
         {
             if (string.IsNullOrEmpty(uid))
             {
-                return null;
+                throw new ArgumentException("UID cannot be null or empty.", nameof(uid));
             }
-
-            List<object> result = new List<object>();
 
             try
             {
-                var list = await _context.Participants.Where(u => u.userId == uid.ToString()).ToArrayAsync();
+                var participants = await _context.Participants
+                                                 .Where(p => p.userId == uid)
+                                                 .ToArrayAsync();
 
-                if (list.Length == 0)
+                if (participants.Length == 0)
                 {
-                    return result;
+                    return new List<object>(); // Return an empty list if no participants are found
                 }
 
-                foreach (var i in list)
+                return participants.Select(p => new
                 {
-                    result.Add(new
-                    {
-                        id = i.eventId.ToString(),
-                        status = i.status.ToString()
-                    });
-                }
-
-                return result;
+                    id = p.eventId.ToString(),
+                    status = p.status.ToString()
+                }).ToList<object>();
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error: {ex.Message}");
-                return null;
+                throw new Exception("An error occurred while retrieving participant data.", ex);
             }
         }
+
 
         public async Task UnregisterEvent(string eventid, string uid) {
             var result = _context.Participants.FirstOrDefault(u => u.userId == uid && u.eventId == int.Parse(eventid));

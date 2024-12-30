@@ -34,45 +34,45 @@ namespace event_service.Kafka
             _serviceProvider = serviceProvider;
         }
 
-        public async Task<List<CustomParticipants>> ConsumeMessagesAsync(CancellationToken stoppingToken, string eventId)
-        {
-            var results = new List<CustomParticipants>();
+        //public async Task<List<CustomParticipants>> ConsumeMessagesAsync(CancellationToken stoppingToken, string eventId)
+        //{
+        //    var results = new List<CustomParticipants>();
 
-            try
-            {
-                while (!stoppingToken.IsCancellationRequested)
-                {
-                    try
-                    {
-                        var consumeResult = _consumer.Consume(stoppingToken);
+        //    try
+        //    {
+        //        while (!stoppingToken.IsCancellationRequested)
+        //        {
+        //            try
+        //            {
+        //                var consumeResult = _consumer.Consume(stoppingToken);
 
-                        if (consumeResult != null)
-                        {
-                            //_logger.LogInformation($"Received message at {consumeResult.TopicPartitionOffset}: {consumeResult.Message.Value}");
+        //                if (consumeResult != null)
+        //                {
+        //                    //_logger.LogInformation($"Received message at {consumeResult.TopicPartitionOffset}: {consumeResult.Message.Value}");
 
-                            results = JsonSerializer.Deserialize<List<CustomParticipants>>(consumeResult.Message.Value);
-                            var key = consumeResult.Message.Key;
+        //                    results = JsonSerializer.Deserialize<List<CustomParticipants>>(consumeResult.Message.Value);
+        //                    var key = consumeResult.Message.Key;
                             
-                            if(key == eventId)
-                            {
-                                _consumer.Commit(consumeResult);
-                            }
-                            return results;
-                        }
-                    }
-                    catch (ConsumeException ex)
-                    {
-                        _logger.LogError($"Consume error: {ex.Error.Reason}");
-                    }
-                }
-            }
-            catch (OperationCanceledException)
-            {
-                _consumer.Close();
-            }
+        //                    if(key == eventId)
+        //                    {
+        //                        _consumer.Commit(consumeResult);
+        //                    }
+        //                    return results;
+        //                }
+        //            }
+        //            catch (ConsumeException ex)
+        //            {
+        //                _logger.LogError($"Consume error: {ex.Error.Reason}");
+        //            }
+        //        }
+        //    }
+        //    catch (OperationCanceledException)
+        //    {
+        //        _consumer.Close();
+        //    }
 
-            return null;
-        }
+        //    return null;
+        //}
 
         public void Dispose()
         {

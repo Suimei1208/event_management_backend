@@ -9,8 +9,8 @@ namespace event_service.DTO
         public string userId { get; set; }
         public int eventId { get; set; }
         public DateTime registration_Date { get; set; }
-        public string status { get; set; } // Nếu là người tham gia thì khi đăng kí thì sẽ đợi người tạo event duyệt
-        public string role { get; set; } // speaker, guest, người tham gia
+        public string status { get; set; }
+        public string role { get; set; }
     }
 
     public static class ParticipantsMapper
@@ -23,8 +23,8 @@ namespace event_service.DTO
                 userId = participantsDto.userId,
                 eventId = participantsDto.eventId,
                 registration_Date = participantsDto.registration_Date,
-                role = participantsDto.role,
-                status = participantsDto.status
+                status = participantsDto.status,
+                role = participantsDto.role
             };
         }
 

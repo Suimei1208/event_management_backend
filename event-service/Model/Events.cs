@@ -29,7 +29,7 @@ namespace event_service.Model
         [Required]
         public string type { get; set; }
         public int eventCode { get; set; }
-
-        public ICollection<Participants> Participants { get; set; } = new List<Participants>();
+        public bool access { get; set; } = false;
+        public bool allowSelectSchedule { get; set; } = false;
     }
 }

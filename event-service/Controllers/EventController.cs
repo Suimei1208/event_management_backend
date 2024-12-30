@@ -1,5 +1,6 @@
 ﻿using event_service.DTO;
 using event_service.Interface;
+using event_service.Model;
 using event_service.Service;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -99,7 +100,7 @@ namespace event_service.Controllers
 
         // Chỉnh sửa sự kiện
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateEvent(int id, [FromBody] EventWithParticipantsDto eventDto)
+        public async Task<IActionResult> UpdateEvent(int id, [FromBody] Events eventDto)
         {
             var updated = await _eventService.UpdateEventAsync(id, eventDto);
             if (!updated)
@@ -180,14 +181,14 @@ namespace event_service.Controllers
 
         [HttpGet("get-register-event")]
         [Authorize]
-        public async Task<IActionResult> GetEventHomePage(string uid, string role)
+        public async Task<IActionResult> GetEventHomePage(string uid)
         {
-            var result = await _eventService.GetEventHomePage(uid, role);
+            var result = await _eventService.GetEventHomePage(uid);
             if (result == null)
             {
                 return NotFound(new CustomData
                 {
-                    Success = false,
+                    Success = true,
                     Message = "No events register",
                     Data = null
                 });
@@ -304,7 +305,7 @@ namespace event_service.Controllers
         //[Authorize]
         public async Task<IActionResult> getEventCanRegister()
         {
-            var listEvent = await _eventService.GetEventStatus("Upcoming");
+            var listEvent = await _eventService.GetEventStatus("Pending");
             return Ok(new CustomData
             {
                 Success = true,
@@ -319,7 +320,7 @@ namespace event_service.Controllers
         {
             try
             {
-                var participants = await _eventService.GetParticipantsByEventIdAndRoleAsync(eventId, role);
+                var participants = await _eventService.GetParticipantsByEventIdandRole(eventId, role);
 
                 if (participants == null || !participants.Any())
                 {
@@ -351,11 +352,11 @@ namespace event_service.Controllers
 
         [HttpDelete("event/{eventId}/participants/{participantId}/role/{role}")]
         [Authorize]
-        public async Task<IActionResult> DeleteParticipant(int eventId, int participantId, string role)
+        public async Task<IActionResult> DeleteParticipant(int eventId, int participantId)
         {
             try
             {
-                var result = await _eventService.DeleteParticipantAsync(eventId, participantId, role);
+                var result = await _eventService.DeleteParticipantAsync(eventId, participantId);
 
                 if (!result)
                 {
@@ -385,19 +386,19 @@ namespace event_service.Controllers
             }
         }
 
-        [HttpGet("event/{eventId}/participants/pending")]
+        [HttpGet("event/{eventId}/participants-status/{status}")]
         [Authorize]
-        public async Task<IActionResult> GetPendingParticipants(int eventId)
+        public async Task<IActionResult> GetStatusParticipants(int eventId, string status)
         {
             try
             {
-                var participants = await _eventService.GetPendingParticipantsAsync(eventId);
+                var participants = await _eventService.GetStatusParticipantsAsync(eventId,status);
 
                 if (participants == null)
                 {
-                    return NotFound(new CustomData
+                    return Ok(new CustomData
                     {
-                        Success = false,
+                        Success = true,
                         Message = "No pending participants found for the given event",
                         Data = null
                     });
@@ -442,6 +443,137 @@ namespace event_service.Controllers
                 Message = "Participant approved successfully",
                 Data = null
             });
+        }
+
+        [HttpPost("event/{scheduleId}/add-schedule-participant/{userId}")]
+        [Authorize]
+        public async Task<IActionResult> AddParticipantToSchedule(int scheduleId, string userId)
+        {
+            var success = await _eventService.AddParticipantToScheduleAsync(scheduleId, userId);
+
+            if (!success)
+            {
+                return StatusCode(500, new CustomData
+                {
+                    Success = false,
+                    Message = "An error occurred while adding the participant",
+                    Data = null
+                });
+            }
+
+            return Ok(new CustomData
+            {
+                Success = true,
+                Message = "Participant added successfully to the schedule",
+                Data = null
+            });
+        }
+
+        [HttpPut("event/{id}/access")]
+        [Authorize]
+        public async Task<IActionResult> UpdateEventAccess(int id, bool access)
+        {
+            try
+            {
+                var updated = await _eventService.UpdateEventAccessAsync(id, access);
+
+                if (!updated)
+                {
+                    return NotFound(new CustomData
+                    {
+                        Success = false,
+                        Message = "Event not found or access update failed.",
+                        Data = null
+                    });
+                }
+
+                return Ok(new CustomData
+                {
+                    Success = true,
+                    Message = "Event access updated successfully",
+                    Data = new { EventId = id, Access = access }
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new CustomData
+                {
+                    Success = false,
+                    Message = $"An error occurred while updating event access: {ex.Message}",
+                    Data = null
+                });
+            }
+        }
+
+        [HttpPut("event/{id}/allow")]
+        [Authorize]
+        public async Task<IActionResult> UpdateEventAllow(int id, bool allow)
+        {
+            try
+            {
+                var updated = await _eventService.UpdateEventAllowAsync(id, allow);
+
+                if (!updated)
+                {
+                    return NotFound(new CustomData
+                    {
+                        Success = false,
+                        Message = "Event not found or access update failed.",
+                        Data = null
+                    });
+                }
+
+                return Ok(new CustomData
+                {
+                    Success = true,
+                    Message = "Event allow updated successfully",
+                    Data = new { EventId = id, allowSelectSchedule = allow }
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new CustomData
+                {
+                    Success = false,
+                    Message = $"An error occurred while updating event allow: {ex.Message}",
+                    Data = null
+                });
+            }
+        }
+
+        [HttpGet("event/data/{id}")]
+        [Authorize]
+        public async Task<IActionResult> GetEventData(int id)
+        {
+            try
+            {
+                var eventData = await _eventService.GetTicketDataByIdAsync(id);
+
+                if (eventData == null)
+                {
+                    return NotFound(new CustomData
+                    {
+                        Success = false,
+                        Message = "Event not found",
+                        Data = null
+                    });
+                }
+                return Ok(new CustomData
+                {
+                    Success = true,
+                    Message = "Event data retrieved successfully",
+                    Data = eventData
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new CustomData
+                {
+                    Success = false,
+                    Message = $"An internal error occurred: {ex.Message}",
+                    Data = null
+                });
+            }
         }
     }
 }

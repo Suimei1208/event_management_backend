@@ -13,7 +13,6 @@ namespace user_services.DTO
                 Name = user.Name,
                 Email = user.Email,
                 Phone = user.Phone,
-                Role = user.Role
             };
         }
 
@@ -26,7 +25,6 @@ namespace user_services.DTO
                 Name = userDTO.Name,
                 Email = userDTO.Email,
                 Phone = userDTO.Phone,
-                Role = userDTO.Role
             };
         }
     }
@@ -37,6 +35,5 @@ namespace user_services.DTO
         public required string Name { get; set; } = "Default";
         public required string Email { get; set; } = "default@gmail.com";
         public required string Phone { get; set; } = "0000000000";
-        public required string Role { get; set; } = "none";
     }
 }
