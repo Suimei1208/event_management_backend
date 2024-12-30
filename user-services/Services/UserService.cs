@@ -38,36 +38,36 @@ namespace user_services.Services
             return newUser;
         }
 
-        public string getRole(FirebaseToken token)
-        {
-            if (token == null || string.IsNullOrEmpty(token.Uid))
-            {
-                throw new ArgumentException("Invalid Firebase token.");
-            }
+        //public string getRole(FirebaseToken token)
+        //{
+        //    if (token == null || string.IsNullOrEmpty(token.Uid))
+        //    {
+        //        throw new ArgumentException("Invalid Firebase token.");
+        //    }
 
-            // Tìm người dùng trong cơ sở dữ liệu dựa trên Uid
-            var user = _context.Users.FirstOrDefault(a => a.Id == token.Uid);
+        //    // Tìm người dùng trong cơ sở dữ liệu dựa trên Uid
+        //    var user = _context.Users.FirstOrDefault(a => a.Id == token.Uid);
 
-            if (user == null)
-            {
-                throw new InvalidOperationException("User not found for the given token.");
-            }
+        //    if (user == null)
+        //    {
+        //        throw new InvalidOperationException("User not found for the given token.");
+        //    }
 
-            return user.Role;
-        }
+        //    return user.Role;
+        //}
 
-        public async Task<UserDTO> UpdateRole(string role, string id)
-        {
-            var user = await _context.Users.FirstOrDefaultAsync(a => a.Id == id);
-            if (user == null)
-            {
-                throw new InvalidOperationException("User not found.");
-            }
-            user.Role = role;
-            await _context.SaveChangesAsync();
-            UserDTO currentUser = user.ToDTO();
-            return currentUser;
-        }
+        //public async Task<UserDTO> UpdateRole(string role, string id)
+        //{
+        //    var user = await _context.Users.FirstOrDefaultAsync(a => a.Id == id);
+        //    if (user == null)
+        //    {
+        //        throw new InvalidOperationException("User not found.");
+        //    }
+        //    user.Role = role;
+        //    await _context.SaveChangesAsync();
+        //    UserDTO currentUser = user.ToDTO();
+        //    return currentUser;
+        //}
         public UserDTO GetUserDetails(FirebaseToken token)
         {
             var user = _context.Users.FirstOrDefault(a => a.Id == token.Uid);
@@ -100,7 +100,7 @@ namespace user_services.Services
                 {
                     id = user.Id,
                     name = user.Name,
-                    role = user.Role,
+                    //role = user.Role,
                 })
                 .ToListAsync();
             var customListUser = new List<CustomUser>();
@@ -129,14 +129,14 @@ namespace user_services.Services
             var user = await _context.Users.FirstOrDefaultAsync(a => a.Id == id);
             if (user == null)
             {
-                throw new InvalidOperationException("User not found.");
+                return new CustomUser();
             }
             var customUser = new CustomUser();
             try
             {
                 customUser.id = user.Id;
                 customUser.name = user.Name;
-                customUser.role = user.Role;
+                //customUser.role = user.Role;
                 customUser.avtUrl = await _firebaseAuthService.GetUserPhotoUrl(user.Id);              
             }
             catch (FirebaseAuthException ex)

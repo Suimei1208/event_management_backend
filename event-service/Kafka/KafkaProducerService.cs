@@ -30,7 +30,7 @@ namespace event_service.Kafka
                 {
                     UserId = participantsDto.userId,
                     EventId = participantsDto.eventId,
-                    RoleInEvent = participantsDto.role
+                    //RoleInEvent = participantsDto.role
                 };
                 messages.Add(userEvent);             
             }

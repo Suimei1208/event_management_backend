@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.ObjectPool;
 using System.Collections.Generic;
 using System.Data;
+using System.Reflection.Metadata;
 using System.Text;
 
 namespace event_service.Service
@@ -26,14 +27,14 @@ namespace event_service.Service
         }
 
         public async Task<EventDto> CreateEventAsync(EventDto eventDto)
-        { 
+        {
             Events newEvent = eventDto.ToEntity();
 
             _context.Events.Add(newEvent);
             await _context.SaveChangesAsync();
 
             return EventMapper.ToDto(newEvent);
-           
+
         }
 
         public async Task<List<EventDto>> GetEventAsync(string id)
@@ -64,7 +65,7 @@ namespace event_service.Service
             try
             {
                 var events = await _context.Events
-                                           .Where(e => e.Status == status)
+                                           .Where(e => e.Status == status && e.access == true)
                                            .ToListAsync();
 
                 return events?.Any() == true ? EventMapper.ToDtoList(events) : new List<EventDto>();
@@ -87,8 +88,10 @@ namespace event_service.Service
             return events.Select(EventMapper.ToDto);
         }
 
+
+
         // Chỉnh sửa sự kiện
-        public async Task<bool> UpdateEventAsync(int id, EventWithParticipantsDto eventDto)
+        public async Task<bool> UpdateEventAsync(int id, Events eventDto)
         {
             var eventItem = await _context.Events.FindAsync(id);
             if (eventItem == null)
@@ -102,7 +105,7 @@ namespace event_service.Service
             eventItem.EndDate = eventDto.EndDate;
             eventItem.Location = eventDto.Location ?? "error loca";
             eventItem.TargetAudience = eventDto.TargetAudience ?? "error obj";
-            eventItem.type = eventDto.Type ?? "Seminar";
+            eventItem.type = eventDto.type ?? "Seminar";
             eventItem.Banner = eventDto.Banner ?? "";
 
             _context.Entry(eventItem).State = EntityState.Modified;
@@ -133,18 +136,17 @@ namespace event_service.Service
 
             if (currentEvent == null)
             {
-                return null; 
+                return null;
             }
 
             return currentEvent.id.ToString();
         }
 
-        public async Task<EventWithParticipantsDto> GetEventByIdAsync(int id)
+        public async Task<Events> GetEventByIdAsync(int id)
         {
             try
             {
                 var eventEntity = await _context.Events
-                    .Include(e => e.Participants)
                     .FirstOrDefaultAsync(e => e.id == id);
 
                 if (eventEntity == null)
@@ -152,9 +154,9 @@ namespace event_service.Service
                     return null;
                 }
 
-                return new EventWithParticipantsDto
+                return new Events
                 {
-                    Id = eventEntity.id,
+                    id = eventEntity.id,
                     Name = eventEntity.Name,
                     Description = eventEntity.Description,
                     StartDate = eventEntity.StartDate,
@@ -162,12 +164,9 @@ namespace event_service.Service
                     Location = eventEntity.Location,
                     TargetAudience = eventEntity.TargetAudience,
                     Status = eventEntity.Status,
-                    Type = eventEntity.type,
+                    type = eventEntity.type,
                     Banner = eventEntity.Banner,
                     eventCode = eventEntity.eventCode,
-                    Participants = eventEntity.Participants?
-                        .Select(ParticipantsMapper.ToDto)
-                        .ToList() ?? new List<ParticipantsDto>()
                 };
             }
             catch (Exception)
@@ -177,28 +176,28 @@ namespace event_service.Service
         }
 
 
-        public async Task<List<EventDto>> GetEventHomePage(string uid, string role)
+        public async Task<List<EventDto>> GetEventHomePage(string uid)
         {
             DateTime currentDateTime = DateTime.Now;
 
             HashSet<int> addedEventIds = new HashSet<int>();
             List<EventDto> listEvent = new List<EventDto>();
 
-            if (role == "Organizer")
-            {
-                var list = await GetEventAsync(uid);
-                if (list != null)
-                {
-                    foreach (var item in list)
-                    {
-                        if (currentDateTime <= item.StartDate &&  addedEventIds.Add(item.id))
-                        {
-                            Console.WriteLine($"StartDate: {item.StartDate}, currentDateTime: {currentDateTime}");
-                            listEvent.Add(item);
-                        }
-                    }
-                }
-            }
+            //if (role == "Organizer")
+            //{
+            //    var list = await GetEventAsync(uid);
+            //    if (list != null)
+            //    {
+            //        foreach (var item in list)
+            //        {
+            //            if (currentDateTime <= item.StartDate &&  addedEventIds.Add(item.id))
+            //            {
+            //                Console.WriteLine($"StartDate: {item.StartDate}, currentDateTime: {currentDateTime}");
+            //                listEvent.Add(item);
+            //            }
+            //        }
+            //    }
+            //}
 
             var userRegisterEvent = await _context.Participants.Where(u => u.userId == uid).ToListAsync();
             if (userRegisterEvent == null || !userRegisterEvent.Any())
@@ -303,13 +302,8 @@ namespace event_service.Service
             return true;
         }
 
-        public async Task<List<ParticipantsDto>> GetParticipantsByEventIdAndRoleAsync(int eventId, string role)
+        public async Task<List<ParticipantsDto>> GetParticipantsByEventIdandRole(int eventId, string role)
         {
-            if (string.IsNullOrWhiteSpace(role))
-            {
-                throw new ArgumentException("Role cannot be null or empty.", nameof(role));
-            }
-
             try
             {
                 var participants = await _context.Participants
@@ -329,12 +323,12 @@ namespace event_service.Service
             }
         }
 
-        public async Task<List<ParticipantsDto>> GetPendingParticipantsAsync(int eventId)
+        public async Task<List<ParticipantsDto>> GetStatusParticipantsAsync(int eventId, String status)
         {
             try
             {
                 var participants = await _context.Participants
-                    .Where(p => p.eventId == eventId && p.status == "Pending")
+                    .Where(p => p.eventId == eventId && p.status == status)
                     .ToListAsync();
 
                 if (participants == null || !participants.Any())
@@ -350,12 +344,12 @@ namespace event_service.Service
             }
         }
 
-        public async Task<bool> DeleteParticipantAsync(int eventId, int participantId, string role)
+        public async Task<bool> DeleteParticipantAsync(int eventId, int participantId)
         {
             try
             {
                 var participant = await _context.Participants
-                    .Where(p => p.eventId == eventId && p.id == participantId && p.role == role)
+                    .Where(p => p.eventId == eventId && p.id == participantId)
                     .FirstOrDefaultAsync();
 
                 if (participant == null)
@@ -374,7 +368,7 @@ namespace event_service.Service
             }
         }
 
-        
+
 
         public async Task<bool> ApproveParticipantAsync(int eventId, int participantId)
         {
@@ -391,6 +385,82 @@ namespace event_service.Service
             await _context.SaveChangesAsync();
 
             return true;
+        }
+
+        public async Task<bool> AddParticipantToScheduleAsync(int scheduleId, string userId)
+        {
+            var scheduleParticipant = new Schedule_Participants
+            {
+                scheduleId = scheduleId,
+                userId = userId,
+                status = "Approved",
+                role = "Participant"
+            };
+
+            try
+            {
+                _context.Schedule_Participants.Add(scheduleParticipant);
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        public async Task<bool> UpdateEventAccessAsync(int eventId, bool access)
+        {
+            var eventEntity = await _context.Events.FindAsync(eventId);
+            if (eventEntity == null)
+            {
+                return false;
+            }
+
+            eventEntity.access = access;
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> UpdateEventAllowAsync(int eventId, bool allow)
+        {
+            var eventEntity = await _context.Events.FindAsync(eventId);
+            if (eventEntity == null)
+            {
+                return false;
+            }
+
+            eventEntity.allowSelectSchedule = allow;
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<EventDto> GetTicketDataByIdAsync(int id)
+        {
+            var eventEntity = await _context.Events
+                .Where(e => e.id == id)
+                .FirstOrDefaultAsync();
+
+            if (eventEntity == null)
+            {
+                return null;
+            }
+
+            var eventDto = new EventDto
+            {
+                id = eventEntity.id,
+                Name = eventEntity.Name,
+                StartDate = eventEntity.StartDate,
+                EndDate = eventEntity.EndDate,
+                status = eventEntity.Status,
+                Banner = eventEntity.Banner,
+                access = eventEntity.access,
+                allowSelectSchedule = eventEntity.allowSelectSchedule,
+                Description = eventEntity.Description,
+                Location = eventEntity.Location
+            };
+
+            return eventDto;
         }
     }
 }

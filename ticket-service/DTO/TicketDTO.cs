@@ -26,7 +26,6 @@ namespace ticket_service.DTO
             };
         }
 
-        // Chuyển đổi từ TicketDTO sang Ticket
         public static Ticket ToEntity(TicketDTO ticketDTO)
         {
             return new Ticket

@@ -17,6 +17,8 @@ namespace event_service.DTO
         public string status { get; set; }
         public string type { get; set; }
         public int eventCode { get; set; }
+        public bool access { get; set; }
+        public bool allowSelectSchedule { get; set; }
     }
     public static class EventMapper
     {
@@ -35,7 +37,9 @@ namespace event_service.DTO
                 type = eventEntity.type,
                 status = eventEntity.Status,
                 Banner = eventEntity.Banner,
-                eventCode = eventEntity.eventCode
+                eventCode = eventEntity.eventCode,
+                access = eventEntity.access,
+                allowSelectSchedule = eventEntity.allowSelectSchedule
             };
         }
 
@@ -54,7 +58,9 @@ namespace event_service.DTO
                 type = eventDto.type,
                 Status = eventDto.status,
                 Banner = eventDto.Banner,
-                eventCode = eventDto.eventCode
+                eventCode = eventDto.eventCode,
+                access = eventDto.access,
+                allowSelectSchedule = eventDto.allowSelectSchedule
             };
         }
         public static List<EventDto> ToDtoList(List<Events> events)

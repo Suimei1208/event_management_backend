@@ -13,7 +13,5 @@ namespace event_service.Model
         public string Email { get; set; }
         [Required]
         public string Phone { get; set; }
-        [Required]
-        public string Role {  get; set; }
     }
 }

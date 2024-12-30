@@ -55,7 +55,7 @@ namespace user_services.Controllers
         public async Task<IActionResult> Login(string firebaseIdToken)
         {
             var decodedToken = await _firebaseAuthService.VerifyTokenAsync(firebaseIdToken);         
-            var role = _userService.getRole(decodedToken);
+            //var role = _userService.getRole(decodedToken);
                    
             return Ok(new CustomData{ 
                 Message = "GET ROLE DONE!",
@@ -63,36 +63,36 @@ namespace user_services.Controllers
                 Data =new 
                 {
                     //Token = customJwt,
-                    role = role,
+                    //role = role,
                     userId = decodedToken.Uid
                 } 
             });
         }
 
-        [HttpPost("UpdateRole")]
-        [Authorize]
-        public async Task<IActionResult> updateRole(string role)
-        {
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        //[HttpPost("UpdateRole")]
+        //[Authorize]
+        //public async Task<IActionResult> updateRole(string role)
+        //{
+        //    var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
 
-            if (string.IsNullOrEmpty(userId))
-            {
-                return Unauthorized("User ID not found in token");
-            }
+        //    if (string.IsNullOrEmpty(userId))
+        //    {
+        //        return Unauthorized("User ID not found in token");
+        //    }
 
-            var updatedUser = await _userService.UpdateRole(role, userId);
+        //    var updatedUser = await _userService.UpdateRole(role, userId);
 
-            if (updatedUser == null)
-            {
-                return NotFound("User update failed.");
-            }
-            return Ok(new CustomData
-            {
-                Message = "OK",
-                Success = true,
-                Data = updatedUser
-            });
-        }
+        //    if (updatedUser == null)
+        //    {
+        //        return NotFound("User update failed.");
+        //    }
+        //    return Ok(new CustomData
+        //    {
+        //        Message = "OK",
+        //        Success = true,
+        //        Data = updatedUser
+        //    });
+        //}
 
         [HttpPut("UpdateProfile")]
         [Authorize]
@@ -219,10 +219,10 @@ namespace user_services.Controllers
 
                 if (user == null)
                 {
-                    return NotFound(new CustomData
+                    return Ok(new CustomData
                     {
                         Message = "User not found",
-                        Success = false
+                        Success = true
                     });
                 }
 
