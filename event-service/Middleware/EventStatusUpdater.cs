@@ -30,7 +30,7 @@ namespace event_service.Middleware
                     //var _firebaseService = scope.ServiceProvider.GetRequiredService<FirebaseService>();
 
                     var _events = _context.Events
-                        .Where(e => e.Status != "cancel")
+                        .Where(e => e.Status != "Cancel")
                         .ToList();
 
                     foreach (var ev in _events)
@@ -69,7 +69,7 @@ namespace event_service.Middleware
 
             if (now < myEvent.StartDate)
             {
-                myEvent.Status = "Pending";
+                myEvent.Status = "Upcoming";
             }
             else if (now >= myEvent.StartDate && now <= myEvent.EndDate)
             {

@@ -185,24 +185,26 @@ namespace event_service.Service
 
             //if (role == "Organizer")
             //{
-            //    var list = await GetEventAsync(uid);
-            //    if (list != null)
-            //    {
-            //        foreach (var item in list)
-            //        {
-            //            if (currentDateTime <= item.StartDate &&  addedEventIds.Add(item.id))
-            //            {
-            //                Console.WriteLine($"StartDate: {item.StartDate}, currentDateTime: {currentDateTime}");
-            //                listEvent.Add(item);
-            //            }
-            //        }
-            //    }
+            var list = await GetEventAsync(uid);
+            
+            if (list != null)
+            {
+                foreach (var item in list)
+                {
+                    if (currentDateTime <= item.StartDate && addedEventIds.Add(item.id))
+                    {
+                        //Console.WriteLine($"StartDate: {item.StartDate}, currentDateTime: {currentDateTime}");
+                        listEvent.Add(item);
+                    }
+                }
+            }
             //}
 
             var userRegisterEvent = await _context.Participants.Where(u => u.userId == uid).ToListAsync();
             if (userRegisterEvent == null || !userRegisterEvent.Any())
             {
-                return null;
+                return listEvent.OrderBy(e => Math.Abs((e.StartDate - DateTime.Now).TotalMilliseconds))
+           .ToList();
             }
 
             foreach (var participant in userRegisterEvent)
@@ -220,7 +222,7 @@ namespace event_service.Service
             }
 
             return listEvent.OrderBy(e => Math.Abs((e.StartDate - DateTime.Now).TotalMilliseconds))
-            .ToList(); ;
+            .ToList(); 
         }
 
         public async Task<ScheduleDto> CreateScheduleAsync(int eventId, ScheduleDto scheduleDto)

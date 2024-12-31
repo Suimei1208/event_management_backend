@@ -38,36 +38,6 @@ namespace user_services.Services
             return newUser;
         }
 
-        //public string getRole(FirebaseToken token)
-        //{
-        //    if (token == null || string.IsNullOrEmpty(token.Uid))
-        //    {
-        //        throw new ArgumentException("Invalid Firebase token.");
-        //    }
-
-        //    // Tìm người dùng trong cơ sở dữ liệu dựa trên Uid
-        //    var user = _context.Users.FirstOrDefault(a => a.Id == token.Uid);
-
-        //    if (user == null)
-        //    {
-        //        throw new InvalidOperationException("User not found for the given token.");
-        //    }
-
-        //    return user.Role;
-        //}
-
-        //public async Task<UserDTO> UpdateRole(string role, string id)
-        //{
-        //    var user = await _context.Users.FirstOrDefaultAsync(a => a.Id == id);
-        //    if (user == null)
-        //    {
-        //        throw new InvalidOperationException("User not found.");
-        //    }
-        //    user.Role = role;
-        //    await _context.SaveChangesAsync();
-        //    UserDTO currentUser = user.ToDTO();
-        //    return currentUser;
-        //}
         public UserDTO GetUserDetails(FirebaseToken token)
         {
             var user = _context.Users.FirstOrDefault(a => a.Id == token.Uid);
@@ -90,17 +60,34 @@ namespace user_services.Services
             await _context.SaveChangesAsync();
             UserDTO currentUser = user.ToDTO();
             return currentUser;
+        }     
+
+        public async Task<CustomUser> GetUserDetails(string id)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(a => a.Id == id);
+            if(user == null)
+            {
+                return new CustomUser();
+            }
+            var user1 = new CustomUser
+            {
+                id = user.Id,
+                NameFromEmail = user.NameFromEmail,
+                userRecord = await FirebaseAuth.DefaultInstance.GetUserAsync(user.Id)
+
+            };
+            return user1;
+
         }
 
         public async Task<List<CustomUser>> SearchUser(string name)
         {
             var listUser = await _context.Users
-                .Where(user => user.Name.Contains(name))
+                .Where(user => user.Name.Contains(name) || user.NameFromEmail.Contains(name))
                 .Select(user => new CustomUser
                 {
                     id = user.Id,
-                    name = user.Name,
-                    //role = user.Role,
+                    NameFromEmail = user.NameFromEmail,
                 })
                 .ToListAsync();
             var customListUser = new List<CustomUser>();
@@ -112,9 +99,9 @@ namespace user_services.Services
                     customListUser.Add(new CustomUser
                     {
                         id = user.id,
-                        name = user.name,
-                        role = user.role,
-                        avtUrl = await _firebaseAuthService.GetUserPhotoUrl(user.id)
+                        NameFromEmail = user.NameFromEmail,
+                        userRecord = await FirebaseAuth.DefaultInstance.GetUserAsync(user.id)
+
                     });
                 }
                 catch (FirebaseAuthException ex)
@@ -124,28 +111,29 @@ namespace user_services.Services
             }
             return customListUser;
         }
-        public async Task<CustomUser> GetUserDetails(string id)
-        {
-            var user = await _context.Users.FirstOrDefaultAsync(a => a.Id == id);
-            if (user == null)
-            {
-                return new CustomUser();
-            }
-            var customUser = new CustomUser();
-            try
-            {
-                customUser.id = user.Id;
-                customUser.name = user.Name;
-                //customUser.role = user.Role;
-                customUser.avtUrl = await _firebaseAuthService.GetUserPhotoUrl(user.Id);              
-            }
-            catch (FirebaseAuthException ex)
-            {
-                Console.WriteLine(ex);
-            }
-            
-            return customUser;
-        }
+
+        //public async Task<CustomUser> GetUserDetails(string id)
+        //{
+        //    var user = await _context.Users.FirstOrDefaultAsync(a => a.Id == id);
+        //    if (user == null)
+        //    {
+        //        return new CustomUser();
+        //    }
+        //    var customUser = new CustomUser();
+        //    try
+        //    {
+        //        customUser.id = user.Id;
+        //        customUser.name = user.Name;
+        //        //customUser.role = user.Role;
+        //        customUser.avtUrl = await _firebaseAuthService.GetUserPhotoUrl(user.Id);
+        //    }
+        //    catch (FirebaseAuthException ex)
+        //    {
+        //        Console.WriteLine(ex);
+        //    }
+
+        //    return customUser;
+        //}
 
     }
 }

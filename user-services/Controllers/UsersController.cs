@@ -51,23 +51,23 @@ namespace user_services.Controllers
                 });
         }
 
-        [HttpGet("login")]
-        public async Task<IActionResult> Login(string firebaseIdToken)
-        {
-            var decodedToken = await _firebaseAuthService.VerifyTokenAsync(firebaseIdToken);         
-            //var role = _userService.getRole(decodedToken);
+        //[HttpGet("login")]
+        //public async Task<IActionResult> Login(string firebaseIdToken)
+        //{
+        //    var decodedToken = await _firebaseAuthService.VerifyTokenAsync(firebaseIdToken);         
+        //    //var role = _userService.getRole(decodedToken);
                    
-            return Ok(new CustomData{ 
-                Message = "GET ROLE DONE!",
-                Success = true,
-                Data =new 
-                {
-                    //Token = customJwt,
-                    //role = role,
-                    userId = decodedToken.Uid
-                } 
-            });
-        }
+        //    return Ok(new CustomData{ 
+        //        Message = "GET ROLE DONE!",
+        //        Success = true,
+        //        Data =new 
+        //        {
+        //            //Token = customJwt,
+        //            //role = role,
+        //            userId = decodedToken.Uid
+        //        } 
+        //    });
+        //}
 
         //[HttpPost("UpdateRole")]
         //[Authorize]
