@@ -186,7 +186,7 @@ namespace event_service.Controllers
             var result = await _eventService.GetEventHomePage(uid);
             if (result == null)
             {
-                return NotFound(new CustomData
+                return Ok(new CustomData
                 {
                     Success = true,
                     Message = "No events register",

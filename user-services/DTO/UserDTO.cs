@@ -13,6 +13,7 @@ namespace user_services.DTO
                 Name = user.Name,
                 Email = user.Email,
                 Phone = user.Phone,
+                NameFromEmail = user.NameFromEmail,
             };
         }
 
@@ -25,7 +26,15 @@ namespace user_services.DTO
                 Name = userDTO.Name,
                 Email = userDTO.Email,
                 Phone = userDTO.Phone,
+                NameFromEmail = ExtractNameFromEmail(userDTO.Email),
+
             };
+        }
+        private static string ExtractNameFromEmail(string email)
+        {
+            if (string.IsNullOrEmpty(email)) return null;
+            var atIndex = email.IndexOf('@');
+            return atIndex > 0 ? email.Substring(0, atIndex) : null;
         }
     }
 
@@ -35,5 +44,6 @@ namespace user_services.DTO
         public required string Name { get; set; } = "Default";
         public required string Email { get; set; } = "default@gmail.com";
         public required string Phone { get; set; } = "0000000000";
+        public string NameFromEmail { get; set; }
     }
 }
