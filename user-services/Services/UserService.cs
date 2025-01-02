@@ -112,6 +112,21 @@ namespace user_services.Services
             return customListUser;
         }
 
+        public async Task<CustomUser> GetUserByStudentIdAsync(string studentId)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.NameFromEmail == studentId);
+
+            if (user == null)
+                throw new InvalidOperationException("User not found.");
+
+            return new CustomUser
+            {
+                id = user.Id,
+                NameFromEmail = user.NameFromEmail,
+            };
+        }
+
+
         //public async Task<CustomUser> GetUserDetails(string id)
         //{
         //    var user = await _context.Users.FirstOrDefaultAsync(a => a.Id == id);

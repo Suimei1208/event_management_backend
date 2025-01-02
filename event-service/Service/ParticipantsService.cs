@@ -1,5 +1,6 @@
 ﻿using event_service.DTO;
 using event_service.Interface;
+using event_service.Model;
 using Microsoft.EntityFrameworkCore;
 
 namespace event_service.Service
@@ -66,6 +67,34 @@ namespace event_service.Service
             var result = _context.Participants.FirstOrDefault(u => u.userId == uid && u.eventId == int.Parse(eventid));
             _context.Participants.Remove(result);
             await _context.SaveChangesAsync();
+        }
+
+        public async Task<List<Participants>> AddParticipantsFromExcelAsync(int eventId, List<string> userIds)
+        {
+            var existingUserIds = await _context.Participants
+                .Where(p => p.eventId == eventId)
+                .Select(p => p.userId)
+                .ToListAsync();
+
+            var newUserIds = userIds.Where(userId => !existingUserIds.Contains(userId)).ToList();
+
+            var participants = newUserIds.Select(userId => new Participants
+            {
+                userId = userId,
+                eventId = eventId,
+                registration_Date = DateTime.Now,
+                status = "Added",
+                role = "Participant",
+                EmailSent = false
+            }).ToList();
+
+            if (participants.Any())
+            {
+                await _context.Participants.AddRangeAsync(participants);
+                await _context.SaveChangesAsync();
+            }
+
+            return participants;
         }
 
     }

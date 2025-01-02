@@ -60,5 +60,29 @@ namespace event_service.Controllers
                 Data = null
             });
         }
+
+        [HttpPost("event/add-participants-excel/{eventId}")]
+        public async Task<IActionResult> AddParticipantsFromExcel(int eventId, [FromBody] List<string> userIds)
+        {
+            if (userIds == null || !userIds.Any())
+            {
+                return BadRequest("User IDs are required.");
+            }
+
+            try
+            {
+                var result = await _participantsService.AddParticipantsFromExcelAsync(eventId, userIds);
+                return Ok(new CustomData
+                {
+                    Message = "Add from excel thành công",
+                    Success = true,
+                    Data = result
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
+        }
     }
 }

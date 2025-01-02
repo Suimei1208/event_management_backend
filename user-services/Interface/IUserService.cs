@@ -13,5 +13,6 @@ namespace user_services.Interface
         Task<UserDTO> UpdateProfile(string name, string phone, string id);
         Task<List<CustomUser>> SearchUser(string name);
         Task<CustomUser> GetUserDetails(string id);
+        Task<CustomUser> GetUserByStudentIdAsync(string studentId);
     }
 }
