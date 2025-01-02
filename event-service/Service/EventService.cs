@@ -192,7 +192,14 @@ namespace event_service.Service
             {
                 foreach (var item in list)
                 {
-                    if (currentDateTime <= item.StartDate && addedEventIds.Add(item.id))
+                    if (item.status == "Ongoing" && addedEventIds.Add(item.id))
+                    {
+                        //Console.WriteLine($"StartDate: {eventItem.StartDate}, currentDateTime: {currentDateTime}");
+
+                        listEvent.Add(item);
+                    }
+
+                    if (currentDateTime <= item.StartDate && addedEventIds.Add(item.id) && item.status != "Cancelled")
                     {
                         //Console.WriteLine($"StartDate: {item.StartDate}, currentDateTime: {currentDateTime}");
                         listEvent.Add(item);
@@ -211,11 +218,17 @@ namespace event_service.Service
             foreach (var participant in userRegisterEvent)
             {
                 var eventItem = await _context.Events.FindAsync(participant.eventId);
+                if(eventItem.Status == "Ongoing" && addedEventIds.Add(eventItem.id))
+                {
+                    //Console.WriteLine($"StartDate: {eventItem.StartDate}, currentDateTime: {currentDateTime}");
+
+                    listEvent.Add(EventMapper.ToDto(eventItem));
+                }
                 if (eventItem != null)
                 {
                     if (currentDateTime <= eventItem.StartDate && addedEventIds.Add(eventItem.id))
                     {
-                        Console.WriteLine($"StartDate: {eventItem.StartDate}, currentDateTime: {currentDateTime}");
+                        //Console.WriteLine($"StartDate: {eventItem.StartDate}, currentDateTime: {currentDateTime}");
 
                         listEvent.Add(EventMapper.ToDto(eventItem));
                     }
@@ -481,7 +494,36 @@ namespace event_service.Service
             return eventDto;
         }
 
-        
+        public async Task<object> GetEventStats(int EventId)
+        {
+            var registered = await _context.Participants.CountAsync(e => e.eventId == EventId  &&
+            e.role == "Participant" && e.status == "Approved");
+
+            var speaker = await _context.Participants.CountAsync(e => e.eventId == EventId &&
+            e.role == "Speaker");
+
+            var Sessions = await _context.Schedules.CountAsync(e => e.EventId == EventId);
+
+            return new
+            {
+                registered = registered,
+                speaker = speaker,
+                sessions = Sessions
+            };
+        }
+
+        public async Task ChangeStatusEventAsync(int eventId, string status)
+        {
+            var currentEvent = await _context.Events.FirstOrDefaultAsync(e => e.id == eventId);
+            if (currentEvent == null)
+            {
+                throw new Exception("Event not found.");
+            }
+
+            currentEvent.Status = status;
+            await _context.SaveChangesAsync();
+        }
+
 
     }
 }
