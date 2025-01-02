@@ -30,7 +30,7 @@ namespace event_service.Middleware
                     //var _firebaseService = scope.ServiceProvider.GetRequiredService<FirebaseService>();
 
                     var _events = _context.Events
-                        .Where(e => e.Status != "Cancel")
+                        .Where(e => e.Status != "Cancelled")
                         .ToList();
 
                     foreach (var ev in _events)

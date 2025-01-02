@@ -30,5 +30,7 @@ namespace event_service.Interface
         Task<bool> UpdateEventAllowAsync(int eventId, bool allow);
         Task<EventDto> GetTicketDataByIdAsync(int id);
         Task<bool> RemoveParticipantAsync(int eventId, int participantId);
+        Task<object> GetEventStats(int EventId);
+        Task ChangeStatusEventAsync(int eventId, string status);
     }
 }

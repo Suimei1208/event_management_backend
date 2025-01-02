@@ -600,8 +600,63 @@ namespace event_service.Controllers
             }
         }
 
-        
+        [HttpGet("event/data/{EventId}/stats")]
+        [Authorize]
+        public async Task<IActionResult> GetEventStats(int EventId)
+        {
+            try
+            {
+                var eventData = await _eventService.GetEventStats(EventId);
 
-
+                if (eventData == null)
+                {
+                    return NotFound(new CustomData
+                    {
+                        Success = false,
+                        Message = "Event not found",
+                        Data = null
+                    });
+                }
+                return Ok(new CustomData
+                {
+                    Success = true,
+                    Message = "Event data retrieved successfully",
+                    Data = eventData
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new CustomData
+                {
+                    Success = false,
+                    Message = $"An internal error occurred: {ex.Message}",
+                    Data = null
+                });
+            }
+        }
+        [HttpPut("event/{EventId}/cancel")]
+        [Authorize]
+        public async Task<IActionResult> CancelEvent(int EventId)
+        {
+            await Task.Run(() => _eventService.ChangeStatusEventAsync(EventId, "Cancelled"));
+            return Ok(new CustomData
+            {
+                Success = true,
+                Message = "Event canceled successfully",
+                Data = null
+            });
+        }
+        [HttpPut("event/{EventId}/reset")]
+        [Authorize]
+        public async Task<IActionResult> ResetEvent(int EventId)
+        {
+            await Task.Run(() => _eventService.ChangeStatusEventAsync(EventId, "Upcoming"));
+            return Ok(new CustomData
+            {
+                Success = true,
+                Message = "Event canceled successfully",
+                Data = null
+            });
+        }
     }
 }
