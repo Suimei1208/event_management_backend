@@ -43,14 +43,12 @@ namespace ticket_service.Service
 
         private string GenerateQRCode(int eventId, string userId)
         {
-            string userIdLast6Digits = userId.Length >= 6 ? userId.Substring(userId.Length - 6) : userId;
-
-            string inputString = $"{eventId}{userIdLast6Digits}";
+            string inputString = $"{userId}-{eventId}";
 
             using (var sha256 = System.Security.Cryptography.SHA256.Create())
             {
                 byte[] hashBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(inputString));
-                string qrCode = BitConverter.ToString(hashBytes).Replace("-", "").ToLower();
+                string qrCode = BitConverter.ToString(hashBytes);
                 return qrCode;
             }
         }

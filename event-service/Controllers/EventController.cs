@@ -5,6 +5,7 @@ using event_service.Service;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Data;
 using System.Security.Claims;
 using user_services.JsonData;
@@ -305,7 +306,7 @@ namespace event_service.Controllers
         //[Authorize]
         public async Task<IActionResult> getEventCanRegister()
         {
-            var listEvent = await _eventService.GetEventStatus("Pending");
+            var listEvent = await _eventService.GetEventStatus("Upcoming");
             return Ok(new CustomData
             {
                 Success = true,
@@ -445,6 +446,29 @@ namespace event_service.Controllers
             });
         }
 
+        [HttpDelete("event/{eventId}/participants/{participantId}/remove")]
+        [Authorize]
+        public async Task<IActionResult> RemoveParticipant(int eventId, int participantId)
+        {
+            var result = await _eventService.RemoveParticipantAsync(eventId, participantId);
+            if (!result)
+            {
+                return NotFound(new CustomData
+                {
+                    Success = false,
+                    Message = "Participant not found or already removed",
+                    Data = null
+                });
+            }
+
+            return Ok(new CustomData
+            {
+                Success = true,
+                Message = "Participant removed successfully",
+                Data = null
+            });
+        }
+
         [HttpPost("event/{scheduleId}/add-schedule-participant/{userId}")]
         [Authorize]
         public async Task<IActionResult> AddParticipantToSchedule(int scheduleId, string userId)
@@ -575,5 +599,9 @@ namespace event_service.Controllers
                 });
             }
         }
+
+        
+
+
     }
 }

@@ -6,6 +6,7 @@ using Google.Api.Gax;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.ObjectPool;
+using OfficeOpenXml;
 using System.Collections.Generic;
 using System.Data;
 using System.Reflection.Metadata;
@@ -370,6 +371,21 @@ namespace event_service.Service
             }
         }
 
+        public async Task<bool> RemoveParticipantAsync(int eventId, int participantId)
+        {
+            var participant = await _context.Participants
+                .FirstOrDefaultAsync(p => p.eventId == eventId && p.id == participantId);
+
+            if (participant == null)
+            {
+                return false;
+            }
+
+            _context.Participants.Remove(participant);
+            await _context.SaveChangesAsync();
+
+            return true;
+        }
 
 
         public async Task<bool> ApproveParticipantAsync(int eventId, int participantId)
@@ -464,5 +480,8 @@ namespace event_service.Service
 
             return eventDto;
         }
+
+        
+
     }
 }
