@@ -344,7 +344,7 @@ namespace event_service.Service
             try
             {
                 var participants = await _context.Participants
-                    .Where(p => p.eventId == eventId && p.status == status)
+                    .Where(p => p.eventId == eventId && p.status == status && p.role == "Participant")
                     .ToListAsync();
 
                 if (participants == null || !participants.Any())
@@ -499,8 +499,7 @@ namespace event_service.Service
             var registered = await _context.Participants.CountAsync(e => e.eventId == EventId  &&
             e.role == "Participant" && e.status == "Approved");
 
-            var speaker = await _context.Participants.CountAsync(e => e.eventId == EventId &&
-            e.role == "Speaker");
+            var speaker = await _context.Special_Participants.CountAsync(e => e.eventId == EventId);
 
             var Sessions = await _context.Schedules.CountAsync(e => e.EventId == EventId);
 
