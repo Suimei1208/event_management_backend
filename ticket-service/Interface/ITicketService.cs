@@ -6,7 +6,7 @@ namespace ticket_service.Interface
 {
     public interface ITicketService
     {
-        Task<bool> AddTicket(int eventId, string userId);
+        Task<bool> AddTicket(int eventId, string userId, string status);
         Task<List<TicketDTO>> GetTicketsByUserId(string userId);
     }
 }
