@@ -17,7 +17,7 @@ namespace ticket_service.Service
             _context = context;
         }
 
-        public async Task<bool> AddTicket(int eventId, string userId)
+        public async Task<bool> AddTicket(int eventId, string userId, string status)
         {
             string qrCode = GenerateQRCode(eventId,userId);
             var ticket = new Ticket
@@ -26,7 +26,7 @@ namespace ticket_service.Service
                 UserId = userId,
                 PurchaseDate = DateTime.UtcNow,
                 QRCode = qrCode,
-                Status = "Approved"
+                Status = status
             };
 
             try

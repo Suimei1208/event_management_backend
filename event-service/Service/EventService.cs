@@ -497,7 +497,7 @@ namespace event_service.Service
         public async Task<object> GetEventStats(int EventId)
         {
             var registered = await _context.Participants.CountAsync(e => e.eventId == EventId  &&
-            e.role == "Participant" && e.status == "Approved");
+            e.role == "Participant" && e.status == "Approved" || e.status == "Added");
 
             var speaker = await _context.Special_Participants.CountAsync(e => e.eventId == EventId);
 

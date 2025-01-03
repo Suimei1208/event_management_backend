@@ -7,5 +7,7 @@ namespace ticket_service
     {
         public TicketDbContext(DbContextOptions<TicketDbContext> options) : base(options) { }
         public DbSet<Ticket> Tickets { get; set; }
+        public DbSet<ticket_cancellation_period> CancellationPeriods { get; set; }
+        public DbSet<detail_ticket_cancellation_period> detail_Ticket_Cancellation_Periods { get; set; }
     }
 }
