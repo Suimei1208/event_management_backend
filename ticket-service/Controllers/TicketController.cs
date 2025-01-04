@@ -11,11 +11,13 @@ namespace ticket_service.Controllers
     {
         private readonly ITicketService _ticketService;
         private readonly ICancellationPeriodsService _cancellationPeriodsService;
+        private readonly IDetailTicketCancellationService _detailTicketCancellationService;
 
-        public TicketController(ITicketService ticketService, ICancellationPeriodsService cancellationPeriodsService)
+        public TicketController(ITicketService ticketService, ICancellationPeriodsService cancellationPeriodsService, IDetailTicketCancellationService detailTicketCancellationService)
         {
             _ticketService = ticketService;
             _cancellationPeriodsService = cancellationPeriodsService;
+            _detailTicketCancellationService = detailTicketCancellationService;
         }
 
         [HttpPost("event/{eventId}/add-tickets/{userId}")]
@@ -87,7 +89,7 @@ namespace ticket_service.Controllers
             return Ok(new
             {
                 Success = true,
-                Message = "create feedback cancel successfully",
+                Message = "get feedback cancel successfully",
                 Data = result
             });
         }
@@ -104,5 +106,44 @@ namespace ticket_service.Controllers
                 Message = "create feedback cancel successfully",
             });
         }
+
+        [HttpPost("feedback/user-cancel/create")]
+        [Authorize]
+        public async Task<IActionResult> createDetailfeedbackCancel([FromBody] detail_ticket_cancellation_period_DTO detail)
+        {
+            await _detailTicketCancellationService.CreateDetailTicketCancellation(detail);
+            return Ok(new
+            {
+                Success = true,
+                Message = "create detail feedback cancel successfully",
+            });
+        }
+
+        [HttpGet("feedback/user-cancel/get/status")]
+        [Authorize]
+        public async Task<IActionResult> getDetailfeedbackCancel(int eventid, string uid)
+        {
+           var result =  await _detailTicketCancellationService.getStatusTicketCancellation(eventid, uid);
+            return Ok(new
+            {
+                Success = true,
+                Message = "get detail status feedback cancel successfully",
+                Data = result
+            });
+        }
+
+        [HttpGet("feedback/user-cancel/get/list-user/pending")]
+        [Authorize]
+        public async Task<IActionResult> getListUserCancelPending(int eventId, string status)
+        {
+            var result = await _detailTicketCancellationService.GetDetailCancelAsync(eventId, status);
+            return Ok(new
+            {
+                Success = true,
+                Message = "get detail status feedback cancel successfully",
+                Data = result
+            });
+        }
     }
 }
+ 

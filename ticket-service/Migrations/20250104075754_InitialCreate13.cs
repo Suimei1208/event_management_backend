@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace ticket_service.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate11 : Migration
+    public partial class InitialCreate13 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -22,8 +22,8 @@ namespace ticket_service.Migrations
                     id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     event_id = table.Column<int>(type: "int", nullable: false),
-                    start_date = table.Column<DateTime>(type: "datetime(6)", nullable: true),
-                    end_date = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    start_date = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    end_date = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     is_reason_imgage_required = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     is_link_required = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     link = table.Column<string>(type: "longtext", nullable: true)
@@ -48,6 +48,8 @@ namespace ticket_service.Migrations
                     reason = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     link_image = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    status = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4")
                 },
                 constraints: table =>

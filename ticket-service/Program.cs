@@ -17,7 +17,11 @@ namespace ticket_service
         {
             var builder = WebApplication.CreateBuilder(args);
             builder.Services.AddScoped<ITicketService, TicketService>();
+            // In Program.cs or Startup.cs
+            builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+
             builder.Services.AddScoped<ICancellationPeriodsService, CancellationPeriodsService>();
+            builder.Services.AddScoped<IDetailTicketCancellationService, DetailTicketCancellationService>();
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(
                 op =>
