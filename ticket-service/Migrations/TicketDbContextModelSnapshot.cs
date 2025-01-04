@@ -75,6 +75,10 @@ namespace ticket_service.Migrations
                     b.Property<DateTime>("send_at")
                         .HasColumnType("datetime(6)");
 
+                    b.Property<string>("status")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
                     b.Property<string>("uid")
                         .IsRequired()
                         .HasColumnType("longtext");

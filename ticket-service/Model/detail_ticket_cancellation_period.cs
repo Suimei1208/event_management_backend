@@ -14,5 +14,9 @@ namespace ticket_service.Model
         public DateTime send_at { get; set; }
         public string reason { get; set; }
         public string link_image { get; set; }
+        public string status { get; set; }
+
     }
+  
+
 }

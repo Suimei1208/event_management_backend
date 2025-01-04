@@ -12,8 +12,8 @@ using ticket_service;
 namespace ticket_service.Migrations
 {
     [DbContext(typeof(TicketDbContext))]
-    [Migration("20250103122259_InitialCreate12")]
-    partial class InitialCreate12
+    [Migration("20250104075754_InitialCreate13")]
+    partial class InitialCreate13
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -77,6 +77,10 @@ namespace ticket_service.Migrations
 
                     b.Property<DateTime>("send_at")
                         .HasColumnType("datetime(6)");
+
+                    b.Property<string>("status")
+                        .IsRequired()
+                        .HasColumnType("longtext");
 
                     b.Property<string>("uid")
                         .IsRequired()
