@@ -658,5 +658,34 @@ namespace event_service.Controllers
                 Data = null
             });
         }
+
+        
+
+
+
+        //[HttpPost("event/{EventId}/checkout")]
+        //[Authorize]
+        //public async Task<IActionResult> CheckOut(int EventId, [FromBody] string request)
+        //{
+        //    try
+        //    {
+        //        var result = await _eventService.CheckOutAsync(EventId, request.QRCode);
+        //        return Ok(new CustomData
+        //        {
+        //            Success = true,
+        //            Message = "Check-out successful",
+        //            Data = result
+        //        });
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return BadRequest(new CustomData
+        //        {
+        //            Success = false,
+        //            Message = ex.Message,
+        //            Data = null
+        //        });
+        //    }
+        //}
     }
 }
