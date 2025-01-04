@@ -43,15 +43,30 @@ namespace ticket_service.Service
 
         private string GenerateQRCode(int eventId, string userId)
         {
-            string inputString = $"{userId}-{eventId}";
+            string encodedUserId = Convert.ToBase64String(Encoding.UTF8.GetBytes(userId));
+            string encodedEventId = Convert.ToBase64String(Encoding.UTF8.GetBytes(eventId.ToString()));
 
-            using (var sha256 = System.Security.Cryptography.SHA256.Create())
+            string inputString = $"{encodedEventId}-{encodedUserId}";
+
+            return inputString;
+        }
+
+
+        private string ValidateQRCode(string qrCode)
+        {
+            try
             {
-                byte[] hashBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(inputString));
-                string qrCode = BitConverter.ToString(hashBytes);
-                return qrCode;
+                byte[] bytes = Convert.FromBase64String(qrCode);
+                string decodedString = Encoding.UTF8.GetString(bytes);
+                return decodedString; // e.g., "userId-eventId"
+            }
+            catch (FormatException)
+            {
+                // Handle invalid base64 input
+                return null;
             }
         }
+
 
         public async Task<List<TicketDTO>> GetTicketsByUserId(string userId)
         {

@@ -3,6 +3,7 @@ using event_service.Interface;
 using event_service.Kafka;
 using event_service.Model;
 using Google.Api.Gax;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.ObjectPool;
@@ -523,6 +524,6 @@ namespace event_service.Service
             await _context.SaveChangesAsync();
         }
 
-
+        
     }
 }

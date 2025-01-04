@@ -14,6 +14,7 @@ namespace event_service
         public DbSet<Event_Schedules> Schedules { get; set; }
         public DbSet<Schedule_Participants> Schedule_Participants { get; set; }
         public DbSet<Special_Participants> Special_Participants { get; set; }
+        public DbSet<EventAttendance> EventAttendances { get; set; }
 
         //protected override void OnModelCreating(ModelBuilder modelBuilder)
         //{
