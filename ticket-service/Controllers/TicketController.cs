@@ -10,14 +10,10 @@ namespace ticket_service.Controllers
     public class TicketController : ControllerBase
     {
         private readonly ITicketService _ticketService;
-        private readonly ICancellationPeriodsService _cancellationPeriodsService;
-        private readonly IDetailTicketCancellationService _detailTicketCancellationService;
-
-        public TicketController(ITicketService ticketService, ICancellationPeriodsService cancellationPeriodsService, IDetailTicketCancellationService detailTicketCancellationService)
+        
+        public TicketController(ITicketService ticketService)
         {
             _ticketService = ticketService;
-            _cancellationPeriodsService = cancellationPeriodsService;
-            _detailTicketCancellationService = detailTicketCancellationService;
         }
 
         [HttpPost("event/{eventId}/add-tickets/{userId}")]
@@ -69,80 +65,29 @@ namespace ticket_service.Controllers
             }
         }
 
-        [HttpPost("tickets/feedback-cancel-event/create")]
+        [HttpGet("tickets/{userId}/qr/{eventid}")]
         [Authorize]
-        public async Task<IActionResult> createFeedbackCancel([FromBody] ticket_cancellation_period period)
+        public async Task<IActionResult> GetTicketsQr(string userId, int eventid)
         {
-            await _cancellationPeriodsService.CreateCancellationPeriods(period);
-            return Ok(new
+            try
             {
-                Success = true,
-                Message = "create feedback cancel successfully",
-            });
-        }
+                var tickets = await _ticketService.getQrTicket(userId, eventid);
+                if (tickets == null)
+                {
+                    return Ok(new { Success = false, Message = "No qr tickets found for this user.", });
+                }
 
-        [HttpGet("feedback/get/{EventId}")]
-        [Authorize]
-        public async Task<IActionResult> getFeedback(int EventId)
-        {
-            var result = await _cancellationPeriodsService.GetPeriod(EventId);
-            return Ok(new
+                return Ok(new
+                {
+                    success = true,
+                    message = "ok",
+                    data = tickets
+                });
+            }
+            catch (Exception ex)
             {
-                Success = true,
-                Message = "get feedback cancel successfully",
-                Data = result
-            });
-        }
-
-        [HttpPut("feedback/update")]
-        [Authorize]
-        public async Task<IActionResult> update([FromBody] ticket_cancellation_period period)
-        {
-            await _cancellationPeriodsService.update(period);
-
-            return Ok(new
-            {
-                Success = true,
-                Message = "create feedback cancel successfully",
-            });
-        }
-
-        [HttpPost("feedback/user-cancel/create")]
-        [Authorize]
-        public async Task<IActionResult> createDetailfeedbackCancel([FromBody] detail_ticket_cancellation_period_DTO detail)
-        {
-            await _detailTicketCancellationService.CreateDetailTicketCancellation(detail);
-            return Ok(new
-            {
-                Success = true,
-                Message = "create detail feedback cancel successfully",
-            });
-        }
-
-        [HttpGet("feedback/user-cancel/get/status")]
-        [Authorize]
-        public async Task<IActionResult> getDetailfeedbackCancel(int eventid, string uid)
-        {
-           var result =  await _detailTicketCancellationService.getStatusTicketCancellation(eventid, uid);
-            return Ok(new
-            {
-                Success = true,
-                Message = "get detail status feedback cancel successfully",
-                Data = result
-            });
-        }
-
-        [HttpGet("feedback/user-cancel/get/list-user/pending")]
-        [Authorize]
-        public async Task<IActionResult> getListUserCancelPending(int eventId, string status)
-        {
-            var result = await _detailTicketCancellationService.GetDetailCancelAsync(eventId, status);
-            return Ok(new
-            {
-                Success = true,
-                Message = "get detail status feedback cancel successfully",
-                Data = result
-            });
+                return StatusCode(500, new { Success = false, Message = "An error occurred while fetching tickets.", Error = ex.Message });
+            }
         }
     }
 }

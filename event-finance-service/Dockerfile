@@ -4,26 +4,26 @@
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 USER $APP_UID
 WORKDIR /app
-EXPOSE 5004
+EXPOSE 5003
 
 
 # This stage is used to build the service project
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["document-service/document-service.csproj", "document-service/"]
-RUN dotnet restore "./document-service/document-service.csproj"
+COPY ["event-finance-service/event-finance-service.csproj", "event-finance-service/"]
+RUN dotnet restore "./event-finance-service/event-finance-service.csproj"
 COPY . .
-WORKDIR "/src/document-service"
-RUN dotnet build "./document-service.csproj" -c $BUILD_CONFIGURATION -o /app/build
+WORKDIR "/src/event-finance-service"
+RUN dotnet build "./event-finance-service.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 # This stage is used to publish the service project to be copied to the final stage
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./document-service.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "./event-finance-service.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 # This stage is used in production or when running from VS in regular mode (Default when not using the Debug configuration)
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "document-service.dll"]
+ENTRYPOINT ["dotnet", "event-finance-service.dll"]

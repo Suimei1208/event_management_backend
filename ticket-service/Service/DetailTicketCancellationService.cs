@@ -11,11 +11,13 @@ namespace ticket_service.Service
         private static readonly HttpClient client = new HttpClient();
 
         private static IHttpContextAccessor _httpContextAccessor;
+        private readonly ITicketService _ticketService;
 
-        public DetailTicketCancellationService(TicketDbContext context, IHttpContextAccessor httpContext)
+        public DetailTicketCancellationService(TicketDbContext context, IHttpContextAccessor httpContext, ITicketService ticketService)
         {
             _context = context;
             _httpContextAccessor = httpContext;
+            _ticketService = ticketService;
         }
 
         private static async Task<CustomUser> GetCustomUserAsync(string uid)
@@ -106,6 +108,22 @@ namespace ticket_service.Service
                 result.Add(newCancel);
             }
             return result;
+        }
+
+        public async Task UpdteDetailCancelAsync(List<string> uids, string status)
+        {
+            var list = _context.detail_Ticket_Cancellation_Periods.Where(e => uids.Contains(e.uid)).ToList();
+            foreach (var item in list)
+            {
+                item.status = status;
+                if (status == "Accepted")
+                {
+                    await _ticketService.UpdateStatusTicket(item.uid, item.event_id, "Cancelled");
+            }
+            }
+            await _context.SaveChangesAsync();
+
+           
         }
     }
 }
