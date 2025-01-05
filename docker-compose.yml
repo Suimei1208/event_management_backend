@@ -46,6 +46,24 @@ services:
     networks:
       - backend
 
+  event-finance-service:
+    image: ${DOCKER_REGISTRY-}eventfinanceservice
+    build:
+        context: .
+        dockerfile: event-finance-service/Dockerfile
+    ports:
+        - "5003:5003"
+    networks:
+        - backend
+  document-service:
+     image: ${DOCKER_REGISTRY-}documentservice
+     build:
+         context: .
+         dockerfile: document-service/Dockerfile
+     ports:
+        - "5004:5004"
+     networks:
+        - backend
   zookeeper:
     image: confluentinc/cp-zookeeper:7.7.0
     hostname: zookeeper

@@ -76,5 +76,21 @@ namespace ticket_service.Service
 
             return tickets.Select(t => TicketMapper.ToDTO(t)).ToList();
         }
+
+        public async Task UpdateStatusTicket(string userid, int eventid, string status)
+        {
+            var ticket = await _context.Tickets.FirstOrDefaultAsync(e => e.UserId == userid && e.EventId == eventid);
+            ticket.Status = status;
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<dynamic> getQrTicket(string uid, int eid)
+        {
+            var ticket = await _context.Tickets.FirstOrDefaultAsync(e => e.UserId == uid && e.EventId == eid);
+            return new { 
+                qr = ticket?.QRCode,
+                statusTicket = ticket?.Status
+            };
+        }
     }
 }

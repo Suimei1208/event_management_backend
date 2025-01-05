@@ -7,5 +7,6 @@ namespace ticket_service.Interface
         Task CreateDetailTicketCancellation(detail_ticket_cancellation_period_DTO detail);
         Task<string> getStatusTicketCancellation(int eventId, string uid);
         Task<List<Deatail_cancel_reponse>> GetDetailCancelAsync(int eventId, string status);
+        Task UpdteDetailCancelAsync(List<string> uids, string status);
     }
 }
