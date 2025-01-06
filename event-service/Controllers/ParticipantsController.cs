@@ -85,7 +85,7 @@ namespace event_service.Controllers
             }
         }
 
-        [HttpGet("particpant/get-role")]
+        [HttpGet("participant/get-role")]
         [Authorize]
         public async Task<IActionResult> GetParticipantRole(string userId, int eventId)
         {

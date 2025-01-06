@@ -100,19 +100,15 @@ namespace event_service.Service
         public async Task<ParticipantsDto> GetParticipantRoleByUserIdAsync(string userId, int eventId)
         {
             var participant = await _context.Participants
-                .Where(p => p.userId == userId && p.eventId == eventId)
-                .FirstOrDefaultAsync();
+                .FirstOrDefaultAsync(p => p.userId == userId && p.eventId == eventId)
+                ;
 
             if (participant == null)
             {
                 return null;
             }
 
-            return new ParticipantsDto
-            {
-                userId = participant.userId,
-                role = participant.role
-            };
+            return ParticipantsMapper.ToDto(participant);
         }
     }
 }
