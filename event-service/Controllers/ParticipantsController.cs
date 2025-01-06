@@ -84,5 +84,29 @@ namespace event_service.Controllers
                 return StatusCode(500, $"An error occurred: {ex.Message}");
             }
         }
+
+        [HttpGet("particpant/get-role")]
+        [Authorize]
+        public async Task<IActionResult> GetParticipantRole(string userId, int eventId)
+        {
+            var result = await _participantsService.GetParticipantRoleByUserIdAsync(userId, eventId);
+
+            if (result == null)
+            {
+                return NotFound(new CustomData
+                {
+                    Message = "Participant not found or not registered for the event",
+                    Success = false,
+                    Data = null
+                });
+            }
+
+            return Ok(new CustomData
+            {
+                Message = "Role retrieved successfully",
+                Success = true,
+                Data = result
+            });
+        }
     }
 }

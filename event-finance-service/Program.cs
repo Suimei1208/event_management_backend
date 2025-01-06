@@ -1,6 +1,8 @@
 
 using event_finance_service.DbContext;
 using event_finance_service.Middleware;
+using event_service.Interface;
+using event_service.Service;
 using FirebaseAdmin.Auth;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -84,6 +86,7 @@ namespace event_finance_service
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+            builder.Services.AddScoped<ISpendingService, SpendingService>();
 
             var app = builder.Build();
 

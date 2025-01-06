@@ -1,6 +1,5 @@
 ﻿using event_service.Interface;
 using event_service.Model;
-using event_service.Service;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using user_services.JsonData;
@@ -39,29 +38,6 @@ namespace event_service.Controllers
                 Data = spendings
             });
         }
-
-        //[HttpGet("{id}")]
-        //[Authorize]
-        //public async Task<IActionResult> GetSpending(int id)
-        //{
-        //    var spending = await _spendingService.GetSpendingByIdAsync(id);
-        //    if (spending == null)
-        //    {
-        //        return NotFound(new CustomData
-        //        {
-        //            Success = false,
-        //            Message = "Spending not found.",
-        //            Data = null
-        //        });
-        //    }
-
-        //    return Ok(new CustomData
-        //    {
-        //        Success = true,
-        //        Message = "Spending data fetched successfully.",
-        //        Data = spending
-        //    });
-        //}
 
         [HttpPost("event/{eventId}/spending/add")]
         [Authorize]

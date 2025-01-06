@@ -97,5 +97,22 @@ namespace event_service.Service
             return participants;
         }
 
+        public async Task<ParticipantsDto> GetParticipantRoleByUserIdAsync(string userId, int eventId)
+        {
+            var participant = await _context.Participants
+                .Where(p => p.userId == userId && p.eventId == eventId)
+                .FirstOrDefaultAsync();
+
+            if (participant == null)
+            {
+                return null;
+            }
+
+            return new ParticipantsDto
+            {
+                userId = participant.userId,
+                role = participant.role
+            };
+        }
     }
 }

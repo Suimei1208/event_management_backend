@@ -1,4 +1,5 @@
-﻿using event_service.Interface;
+﻿using event_finance_service.DbContext;
+using event_service.Interface;
 using event_service.Model;
 using Microsoft.EntityFrameworkCore;
 
@@ -6,9 +7,9 @@ namespace event_service.Service
 {
     public class SpendingService : ISpendingService
     {
-        private readonly EventDbContext _context;
+        private readonly FinanceDbContext _context;
 
-        public SpendingService(EventDbContext context)
+        public SpendingService(FinanceDbContext context)
         {
             _context = context;
         }

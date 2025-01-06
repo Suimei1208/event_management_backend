@@ -23,7 +23,7 @@ namespace event_service.Interface
         Task<List<EventDto>> GetEventStatus(string status);
         Task<List<ParticipantsDto>> GetParticipantsByEventIdandRole(int eventId, string role);
         Task<bool> DeleteParticipantAsync(int eventId, int participantId);
-        Task<List<ParticipantsDto>> GetStatusParticipantsAsync(int eventId, String status);
+        Task<List<ParticipantsDto>> GetParticipantsAsync(int eventId, String status, String role);
         Task<bool> ApproveParticipantAsync(int eventId, int participantId);
         Task<bool> AddParticipantToScheduleAsync(int scheduleId, string userId);
         Task<bool> UpdateEventAccessAsync(int eventId, bool access);

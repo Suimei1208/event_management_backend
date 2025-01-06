@@ -340,12 +340,12 @@ namespace event_service.Service
             }
         }
 
-        public async Task<List<ParticipantsDto>> GetStatusParticipantsAsync(int eventId, String status)
+        public async Task<List<ParticipantsDto>> GetParticipantsAsync(int eventId, String status, String role)
         {
             try
             {
                 var participants = await _context.Participants
-                    .Where(p => p.eventId == eventId && p.status == status && p.role == "Participant")
+                    .Where(p => p.eventId == eventId && p.status == status && p.role == role)
                     .ToListAsync();
 
                 if (participants == null || !participants.Any())
