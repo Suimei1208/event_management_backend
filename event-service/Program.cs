@@ -127,7 +127,6 @@ namespace event_service
             builder.Services.AddScoped<IParticipantsService, ParticipantsService>();
             builder.Services.AddScoped<IEventAttendanceService, EventAttendanceService>();
             builder.Services.AddScoped<ISpecialParticipants, SpecialParticipantsService>();
-            builder.Services.AddScoped<ISpendingService, SpendingService>();
             builder.Services.AddScoped<INotification, Notification_service>();
             builder.Services.AddScoped<KafkaConsumerService>();
 

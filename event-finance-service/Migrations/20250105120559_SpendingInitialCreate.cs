@@ -3,14 +3,17 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace event_service.Migrations
+namespace event_finance_service.Migrations
 {
     /// <inheritdoc />
-    public partial class AddSpending : Migration
+    public partial class SpendingInitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.AlterDatabase()
+                .Annotation("MySql:CharSet", "utf8mb4");
+
             migrationBuilder.CreateTable(
                 name: "Spendings",
                 columns: table => new
@@ -20,6 +23,8 @@ namespace event_service.Migrations
                     eventId = table.Column<int>(type: "int", nullable: false),
                     amount = table.Column<double>(type: "double", nullable: false),
                     category = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    type = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4")
                 },
                 constraints: table =>

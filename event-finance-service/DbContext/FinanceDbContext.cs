@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using event_service.Model;
+using Microsoft.EntityFrameworkCore;
 
 namespace event_finance_service.DbContext
 {
@@ -8,5 +9,6 @@ namespace event_finance_service.DbContext
             : base(options)
         {
         }
+        public DbSet<Spending> Spendings { get; set; }
     }
 }

@@ -387,13 +387,13 @@ namespace event_service.Controllers
             }
         }
 
-        [HttpGet("event/{eventId}/participants-status/{status}")]
+        [HttpGet("event/{eventId}/participants-status/{status}/role/{role}")]
         [Authorize]
-        public async Task<IActionResult> GetStatusParticipants(int eventId, string status)
+        public async Task<IActionResult> GetStatusParticipants(int eventId, string status, string role)
         {
             try
             {
-                var participants = await _eventService.GetStatusParticipantsAsync(eventId,status);
+                var participants = await _eventService.GetParticipantsAsync(eventId,status, role);
 
                 if (participants == null)
                 {
