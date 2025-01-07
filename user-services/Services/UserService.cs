@@ -6,6 +6,7 @@ using Newtonsoft.Json.Linq;
 using System.Diagnostics;
 using user_services.DTO;
 using user_services.Interface;
+using user_services.JsonData;
 using user_services.Request;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
@@ -36,6 +37,58 @@ namespace user_services.Services
             await _context.SaveChangesAsync();
 
             return newUser;
+        }
+
+        public async Task<CustomData> RegisterUserViaSocialAsync(UserDTO user)
+        {
+            try
+            {
+                // Verify Firebase token
+                var firebaseToken = user.Id;
+                var decodedToken = await _firebaseAuthService.VerifyTokenAsync(firebaseToken);
+
+                if (decodedToken == null || string.IsNullOrEmpty(decodedToken.Uid))
+                {
+                    return new CustomData
+                    {
+                        Message = "Invalid Firebase token.",
+                        Success = false
+                    };
+                }
+
+                // Check if user already exists
+                var existingUser = await _context.Users.FindAsync(decodedToken.Uid);
+                if (existingUser != null)
+                {
+                    return new CustomData
+                    {
+                        Message = "User already exists.",
+                        Success = false
+                    };
+                }
+
+                // Create new user
+                var newUser = user.ToEntity();
+                newUser.Id = decodedToken.Uid;
+
+                _context.Users.Add(newUser);
+                await _context.SaveChangesAsync();
+
+                return new CustomData
+                {
+                    Message = "User registered successfully.",
+                    Success = true,
+                    Data = user
+                };
+            }
+            catch (Exception ex)
+            {
+                return new CustomData
+                {
+                    Message = $"Registration failed: {ex.Message}",
+                    Success = false
+                };
+            }
         }
 
         public UserDTO GetUserDetails(FirebaseToken token)

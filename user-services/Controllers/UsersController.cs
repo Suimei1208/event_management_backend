@@ -51,23 +51,47 @@ namespace user_services.Controllers
                 });
         }
 
-        //[HttpGet("login")]
-        //public async Task<IActionResult> Login(string firebaseIdToken)
-        //{
-        //    var decodedToken = await _firebaseAuthService.VerifyTokenAsync(firebaseIdToken);         
-        //    //var role = _userService.getRole(decodedToken);
-                   
-        //    return Ok(new CustomData{ 
-        //        Message = "GET ROLE DONE!",
-        //        Success = true,
-        //        Data =new 
-        //        {
-        //            //Token = customJwt,
-        //            //role = role,
-        //            userId = decodedToken.Uid
-        //        } 
-        //    });
-        //}
+        [HttpPost("register-via-social")]
+        public async Task<IActionResult> RegisterViaSocial([FromBody] UserDTO user)
+        {
+            try
+            {
+                var result = await _userService.RegisterUserViaSocialAsync(user);
+
+                if (result == null)
+                {
+                    return BadRequest(result);
+                }
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    Message = $"Internal server error: {ex.Message}",
+                    Success = false
+                });
+            }
+        }
+
+        [HttpGet("login")]
+        public async Task<IActionResult> Login(string firebaseIdToken)
+        {
+            var decodedToken = await _firebaseAuthService.VerifyTokenAsync(firebaseIdToken);
+
+            return Ok(new CustomData
+            {
+                Message = "Login successfully!",
+                Success = true,
+                Data = new
+                {
+                    //Token = customJwt,
+                    //role = role,
+                    userId = decodedToken.Uid
+                }
+            });
+        }
 
         //[HttpPost("UpdateRole")]
         //[Authorize]
