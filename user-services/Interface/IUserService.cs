@@ -1,12 +1,14 @@
 ﻿using event_service.Model;
 using FirebaseAdmin.Auth;
 using user_services.DTO;
+using user_services.JsonData;
 
 namespace user_services.Interface
 {
     public interface IUserService
     {
         Task<users> RegisterUserAsync(FirebaseToken token, UserDTO user);
+        Task<CustomData> RegisterUserViaSocialAsync(UserDTO user);
         //string getRole(FirebaseToken token);
         //Task<UserDTO> UpdateRole(string role, string id);
         UserDTO GetUserDetails(FirebaseToken token);
