@@ -314,6 +314,7 @@ namespace event_service.Controllers
                 Data = listEvent
             }); 
         }
+       
 
         [HttpGet("event/{eventId}/participants/{role}")]
         [Authorize]
