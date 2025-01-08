@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using event_service;
 
@@ -11,9 +12,11 @@ using event_service;
 namespace event_service.Migrations
 {
     [DbContext(typeof(EventDbContext))]
-    partial class EventDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250108050421_add_new1")]
+    partial class add_new1
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -175,32 +178,6 @@ namespace event_service.Migrations
                     b.HasIndex("eventId");
 
                     b.ToTable("Participants");
-                });
-
-            modelBuilder.Entity("event_service.Model.Review", b =>
-                {
-                    b.Property<int>("id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("id"));
-
-                    b.Property<int>("Eventid")
-                        .HasColumnType("int");
-
-                    b.Property<int>("rate")
-                        .HasColumnType("int");
-
-                    b.Property<string>("review")
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("uid")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.HasKey("id");
-
-                    b.ToTable("Reviews");
                 });
 
             modelBuilder.Entity("event_service.Model.Schedule_Participants", b =>

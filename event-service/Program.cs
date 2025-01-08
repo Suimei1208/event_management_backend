@@ -24,6 +24,7 @@ namespace event_service
             builder.Services.AddHostedService<EventStatusUpdater>();
             builder.Services.AddHostedService<sentEmail>();
             builder.Services.AddScoped<IEmailService, EmailService>();
+            builder.Services.AddScoped<IReviewService, ReviewService>();
             builder.Services.AddScoped<FirebaseService>();
 
             builder.Services.AddSingleton<FirebaseAuth>(provider =>
