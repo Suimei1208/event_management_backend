@@ -1,4 +1,5 @@
-﻿using event_service.Interface;
+﻿using event_service.DTO;
+using event_service.Interface;
 using event_service.Model;
 using Microsoft.EntityFrameworkCore;
 using System.Text;
@@ -14,6 +15,34 @@ namespace event_service.Service
             _context = context;
         }
 
+        public async Task<List<EventAttendanceDto>> GetCheckedInAndCheckedOutParticipantsAsync(int eventId)
+        {
+            try
+            {
+                var participants = await _context.EventAttendances
+                    .Where(a => a.eventId == eventId && a.checkIn && a.checkOut)
+                    .ToListAsync();
+
+                var result = participants.Select(a => new EventAttendanceDto
+                {
+                    id = a.id,
+                    userId = a.userId,
+                    eventId = a.eventId,
+                    checkIn = a.checkIn,
+                    checkInTime = a.checkInTime,
+                    checkOut = a.checkOut,
+                    checkOutTime = a.checkOutTime
+                }).ToList();
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error fetching participants: {ex.Message}", ex);
+            }
+        }
+
+
         public async Task RecordCheckInAsync(string qrCode)
         {
             (string userId, int eventId) = DecodeQRCode(qrCode);
@@ -24,18 +53,17 @@ namespace event_service.Service
                 throw new Exception("Event not found.");
             }
 
-            // Find existing attendance
             var existingAttendance = await _context.EventAttendances
                 .FirstOrDefaultAsync(a => a.eventId == eventId && a.userId == userId);
 
             if (existingAttendance != null)
             {
-                if (existingAttendance.checkIn) // If user has already checked out, we update their check-in data.
+                if (existingAttendance.checkIn)
                 {
                     existingAttendance.checkIn = true;
                     existingAttendance.checkInTime = DateTime.UtcNow.AddHours(7);
                     existingAttendance.checkOut = false;
-                    existingAttendance.checkOutTime = DateTime.UtcNow.AddHours(7); // Reset the check-out time
+                    existingAttendance.checkOutTime = DateTime.UtcNow.AddHours(7);
                 }
                 else
                 {
