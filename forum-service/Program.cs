@@ -1,44 +1,32 @@
-﻿using event_service;
-using user_services.Middleware;
-using Microsoft.EntityFrameworkCore;
-using user_services.Interface;
-using user_services.Services;
-using FirebaseAdmin;
-using Google.Apis.Auth.OAuth2;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
-using System.IdentityModel.Tokens.Jwt;
-using FirebaseAdmin.Auth;
-using Microsoft.Extensions.Options;
-using System.Security.Claims;
-using Newtonsoft.Json.Linq;
-using user_services.DTO;
 
-namespace user_services
+using FirebaseAdmin.Auth;
+using forum_service.DbContext;
+using forum_service.Interface;
+using forum_service.Middleware;
+using forum_service.Service;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+
+namespace forum_service
 {
     public class Program
     {
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+            builder.Services.AddScoped<IForumPostService, ForumPostService>();
+            builder.Services.AddHttpContextAccessor();
 
-            //builder.Services.Configure<KafkaSettings>(builder.Configuration.GetSection("Kafka"));
-            //builder.Services.AddHostedService<KafkaConsumerService>();
-            //builder.Services.AddScoped<KafkaProducerService>();
-            builder.Services.AddSingleton<FirebaseApp>(provider =>
-            {
-                return FirebaseApp.Create(new AppOptions()
-                {
-                    Credential = GoogleCredential.FromFile("firebase-credentials.json")
-                });
-            });
+            // Add services to the container.
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(
                 op =>
                 {
-                    op.Authority = "https://securetoken.google.com/event-management-29368"; 
-                    op.Audience = "event-management-29368"; 
+                    op.Authority = "https://securetoken.google.com/event-management-29368";
+                    op.Audience = "event-management-29368";
                     op.Events = new JwtBearerEvents
                     {
                         OnMessageReceived = context =>
@@ -49,7 +37,7 @@ namespace user_services
                                 var token = authHeader.Substring("Bearer ".Length).Trim();
                                 Console.WriteLine(token);
                                 context.Token = token.ToString();
-                                
+
                             }
                             return Task.CompletedTask;
                         },
@@ -89,25 +77,20 @@ namespace user_services
                         ClockSkew = TimeSpan.Zero
                     };
                 });
-
-            builder.Services.AddSingleton<IFirebaseAuthService, FirebaseAuthService>();
-            builder.Services.AddDbContext<UserDbContext>(options =>
+            builder.Services.AddDbContext<ForumDbContext>(options =>
                options.UseMySql(
                    builder.Configuration.GetConnectionString("DefaultConnection"),
                    new MySqlServerVersion(new Version(9, 1, 0))
                ).EnableDetailedErrors()
            );
-            builder.Services.AddScoped<JwtService>();
-            builder.Services.AddScoped<IUserService, UserService>();
-            // Cấu hình các dịch vụ liên quan đến API
             builder.Services.AddControllers();
-            builder.Services.AddAuthorization();
+            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
             var app = builder.Build();
 
-            // Cấu hình HTTP request pipeline
+            // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
@@ -115,9 +98,12 @@ namespace user_services
             }
 
             app.UseHttpsRedirection();
+
             app.UseMiddleware<LoggingMiddleware>();
             app.UseAuthentication();
             app.UseAuthorization();
+
+
             app.MapControllers();
 
             app.Run();
