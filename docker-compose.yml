@@ -55,6 +55,7 @@ services:
         - "5003:5003"
     networks:
         - backend
+
   document-service:
      image: ${DOCKER_REGISTRY-}documentservice
      build:
@@ -64,6 +65,17 @@ services:
         - "5004:5004"
      networks:
         - backend
+
+  forum-service:
+     image: ${DOCKER_REGISTRY-}forumservice
+     build:
+         context: .
+         dockerfile: forum-service/Dockerfile
+     ports:
+        - "5005:5005"
+     networks:
+        - backend
+
   zookeeper:
     image: confluentinc/cp-zookeeper:7.7.0
     hostname: zookeeper
