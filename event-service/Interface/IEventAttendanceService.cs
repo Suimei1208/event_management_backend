@@ -7,5 +7,6 @@ namespace event_service.Interface
         Task<List<EventAttendanceDto>> GetCheckedInAndCheckedOutParticipantsAsync(int eventId);
         Task RecordCheckInAsync(string qrCode);
         Task RecordCheckOutAsync(string qrCode);
+        Task<EventStatisticsDto> GetEventStatisticsAsync(int eventId);
     }
 }

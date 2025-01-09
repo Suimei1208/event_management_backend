@@ -41,7 +41,6 @@ namespace event_service.Controllers
             }
         }
 
-
         [HttpPost("event/{EventId}/checkin")]
         [Authorize]
         public async Task<IActionResult> CheckIn(int EventId, [FromBody] CheckInRequest request)
@@ -123,6 +122,32 @@ namespace event_service.Controllers
                     Success = true,
                     Message = "Check-in successful",
                     Data = null
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new CustomData
+                {
+                    Success = false,
+                    Message = ex.Message,
+                    Data = null
+                });
+            }
+        }
+
+        [HttpGet("event/{eventId}/stats")]
+        [Authorize]
+        public async Task<IActionResult> GetEventStats(int eventId)
+        {
+            try
+            {
+                var stats = await _eventAttendanceService.GetEventStatisticsAsync(eventId);
+
+                return Ok(new CustomData
+                {
+                    Success = true,
+                    Message = "Event statistics fetched successfully.",
+                    Data = stats
                 });
             }
             catch (Exception ex)

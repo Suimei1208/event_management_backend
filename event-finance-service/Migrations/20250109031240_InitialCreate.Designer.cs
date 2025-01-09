@@ -11,8 +11,8 @@ using event_finance_service.DbContext;
 namespace event_finance_service.Migrations
 {
     [DbContext(typeof(FinanceDbContext))]
-    [Migration("20250105120559_SpendingInitialCreate")]
-    partial class SpendingInitialCreate
+    [Migration("20250109031240_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
