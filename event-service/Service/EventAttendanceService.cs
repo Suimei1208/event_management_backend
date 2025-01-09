@@ -152,5 +152,64 @@ namespace event_service.Service
                 throw new Exception($"Error decoding QR code. Details: {ex.Message}", ex);
             }
         }
+
+        public async Task<EventStatisticsDto> GetEventStatisticsAsync(int eventId)
+        {
+            try
+            {
+                var existedParticipant = _context.Participants.Where(a => a.eventId == eventId);
+                var participants = _context.EventAttendances.Where(a => a.eventId == eventId).ToList();
+                int totalParticipants = existedParticipant.Count();
+                int checkedInParticipants = participants.Count(p => p.checkIn && p.checkOut);
+
+                if (totalParticipants == 0)
+                {
+                    return new EventStatisticsDto
+                    {
+                        AverageParticipationTime = 0,
+                        ParticipationPercentage = 0
+                    };
+                }
+
+                double totalParticipationTimeMinutes = participants
+                    .Where(p => p.checkIn && p.checkOut)
+                    .Sum(p => (p.checkOutTime - p.checkInTime).TotalMinutes);
+
+                string FormatTime(double totalMinutes)
+                {
+                    int days = (int)(totalMinutes / (24 * 60));
+                    totalMinutes %= (24 * 60);
+                    int hours = (int)(totalMinutes / 60);
+                    totalMinutes %= 60;
+                    int minutes = (int)totalMinutes;
+                    double seconds = (totalMinutes - minutes) * 60;
+
+                    if (days > 0)
+                        return $"{days} day(s), {hours} hour(s)";
+                    if (hours > 0)
+                        return $"{hours} hour(s), {minutes} minute(s)";
+                    if (minutes > 0)
+                        return $"{minutes} minute(s), {seconds:F0} second(s)";
+                    return $"{seconds:F0} second(s)";
+                }
+
+                double averageParticipationTimeMinutes = totalParticipationTimeMinutes / checkedInParticipants;
+                string averageParticipationTimeFormatted = FormatTime(averageParticipationTimeMinutes);
+
+                double participationPercentage = ((double)checkedInParticipants / totalParticipants) * 100;
+
+                return new EventStatisticsDto
+                {
+                    AverageParticipationTime = averageParticipationTimeMinutes, 
+                    AverageParticipationTimeFormatted = averageParticipationTimeFormatted,
+                    ParticipationPercentage = participationPercentage
+                };
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
     }
 }

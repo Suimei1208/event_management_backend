@@ -16,4 +16,10 @@
         public string QRCode { get; set; }
     }
 
+    public class EventStatisticsDto
+    {
+        public double AverageParticipationTime { get; set; }
+        public double ParticipationPercentage { get; set; }
+        public string AverageParticipationTimeFormatted { get; internal set; }
+    }
 }
