@@ -1,4 +1,5 @@
 ﻿using forum_service.DTO;
+using forum_service.Model;
 
 namespace forum_service.Interface
 {
@@ -8,5 +9,9 @@ namespace forum_service.Interface
         Task<List<dynamic>> getPostAsync(string uid);
         Task UpdateLike(int id, bool isLike);
         Task<dynamic> detailPost(int idPost, string uid);
+        Task CreateComment(CommentDTO commentDTO);
+        Task CreateReplyComment(CommentReplies commentReplies);
+        Task DeleteComment(int commentId);
+        Task DeleteReplyComment(int commentId);
     }
 }

@@ -8,12 +8,12 @@ namespace event_service.Service
     public class ParticipantsService : IParticipantsService
     {
         private readonly EventDbContext _context;
-        private readonly IKafkaProducerService _kafkaProducerService;
+        //private readonly IKafkaProducerService _kafkaProducerService;
 
         public ParticipantsService(EventDbContext context, IKafkaProducerService kafkaProducerService)
         {
             _context = context;
-            _kafkaProducerService = kafkaProducerService;
+            //_kafkaProducerService = kafkaProducerService;
         }
 
         public async Task AddParticipants(List<ParticipantsDto> participantsDtos)
@@ -29,7 +29,7 @@ namespace event_service.Service
        .Where(e => e.eventId == eventId)
        .ToListAsync();
             var participantsDtos = participants.Select(p => p.ToDto()).ToList();
-            await _kafkaProducerService.SendMessageAsync(participantsDtos);
+            //await _kafkaProducerService.SendMessageAsync(participantsDtos);
         }
 
         public async Task<List<object>> getEventRegisterPending(string uid)

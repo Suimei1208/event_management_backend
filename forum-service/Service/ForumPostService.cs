@@ -72,8 +72,8 @@ namespace forum_service.Service
 
         public async Task CreatePost(ForumPostDTO forumPostDTO)
         {
-           await _context.Forums.AddAsync(forumPostDTO.ToEntity());
-           await _context.SaveChangesAsync();
+            await _context.Forums.AddAsync(forumPostDTO.ToEntity());
+            await _context.SaveChangesAsync();
         }
 
         public async Task<List<dynamic>> getPostAsync(string uid)
@@ -82,7 +82,7 @@ namespace forum_service.Service
             var list = await _context.Forums
                              .OrderByDescending(post => post.timepost)
                              .ToListAsync();
-            if(list == null)
+            if (list == null)
             {
                 return null;
             }
@@ -106,6 +106,8 @@ namespace forum_service.Service
                     isLike = islike != null ? true : false,
                     user
                 });
+                i.comments_count = comments_count;
+                await _context.SaveChangesAsync();
             }
             return result;
         }
@@ -155,10 +157,11 @@ namespace forum_service.Service
             List<dynamic> replies = new List<dynamic>();
             foreach (var i in Listcomments)
             {
-                var reply = await _context.CommentReplies.Where(e => e.comment_id == i.id).ToListAsync();
+                var reply = await GetRepliesComment(i.id);
                 var oneComment = new
                 {
                     comments = i,
+                    user = await GetCustomUserAsync(i.uid),
                     replies = reply
                 };
                 comments.Add(oneComment);
@@ -170,6 +173,61 @@ namespace forum_service.Service
                 comments,
                 isLike = islike != null ? true : false,
             };
+        }
+
+        private async Task<dynamic> GetRepliesComment(int comment_id)
+        {
+            var replies = await _context.CommentReplies.Where(e => e.comment_id == comment_id).ToListAsync();
+            List<dynamic> result = new List<dynamic>();
+            foreach (var i in replies)
+            {
+                var user = await GetCustomUserAsync(i.uid);
+                result.Add(new
+                {
+                    reply = i,
+                    user
+                });
+            }
+            return result;
+        }
+
+        public async Task CreateComment(CommentDTO commentDTO)
+        {
+            await _context.Comments.AddAsync(commentDTO.ToEntity());
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task CreateReplyComment(CommentReplies commentReplies)
+        {
+            await _context.CommentReplies.AddAsync(commentReplies);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task DeleteComment(int commentId)
+        {
+            var comment = await _context.Comments.FirstOrDefaultAsync(e => e.id == commentId);
+            if (comment == null)
+            {
+                return;
+            }
+            var replies = await _context.CommentReplies.Where(e => e.comment_id == comment.id).ToListAsync();
+            foreach (var i in replies)
+            {
+                _context.CommentReplies.Remove(i);
+            }
+            _context.Comments.Remove(comment);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task DeleteReplyComment(int commentReplyId)
+        {
+            var reply = await _context.CommentReplies.FirstOrDefaultAsync(e => e.id == commentReplyId);
+            if (reply == null)
+            {
+                return;
+            }
+            _context.CommentReplies.Remove(reply);
+            await _context.SaveChangesAsync();
         }
     }
 }

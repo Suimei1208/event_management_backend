@@ -5,7 +5,7 @@ namespace event_service.Interface
    
         public interface IKafkaProducerService
         {
-            Task SendMessageAsync(List<ParticipantsDto> participantsDtos);
+            Task SendMessageAsync(int EventId);
         }
     
 }

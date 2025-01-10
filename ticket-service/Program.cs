@@ -19,7 +19,9 @@ namespace ticket_service
             builder.Services.AddScoped<ITicketService, TicketService>();
             // In Program.cs or Startup.cs
             builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-
+            builder.Services.Configure<KafkaSettings>(builder.Configuration.GetSection("Kafka"));
+            builder.Services.AddHostedService<KafkaConsumerService>();
+            //builder.Services.AddScoped<KafkaProducerService>();
             builder.Services.AddScoped<ICancellationPeriodsService, CancellationPeriodsService>();
             builder.Services.AddScoped<IDetailTicketCancellationService, DetailTicketCancellationService>();
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

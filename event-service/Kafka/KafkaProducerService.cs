@@ -21,24 +21,14 @@ namespace event_service.Kafka
             _topic = configuration["Kafka:Producer:Topic"];
         }
 
-        public async Task SendMessageAsync(List<ParticipantsDto> participantsDtos)
+        public async Task SendMessageAsync(int EventId)
         {
-            List<dynamic> messages = new List<dynamic>();
-            foreach (var participantsDto in participantsDtos)
-            {
-                var userEvent = new
-                {
-                    UserId = participantsDto.userId,
-                    EventId = participantsDto.eventId,
-                    //RoleInEvent = participantsDto.role
-                };
-                messages.Add(userEvent);             
-            }
-            var messageValue = JsonSerializer.Serialize(messages);
+            
+            var messageValue = JsonSerializer.Serialize(EventId);
             var message = new Message<string, string>
             {
                 Value = messageValue,
-                Key = participantsDtos[0].eventId.ToString()
+                Key = messageValue
             };
             try
             {

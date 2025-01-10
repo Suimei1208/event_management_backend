@@ -19,13 +19,13 @@ namespace event_service.Service
     {
         private readonly EventDbContext _context;
         private readonly IParticipantsService _participantsService;
-        private readonly KafkaConsumerService _kafkaConsumerService;
+        private readonly IKafkaProducerService _kafkaProducerService;
 
-        public EventService(EventDbContext context, IParticipantsService participantsService, KafkaConsumerService kafkaConsumerService)
+        public EventService(EventDbContext context, IParticipantsService participantsService, IKafkaProducerService kafkaProducerService)
         {
             _context = context;
             _participantsService = participantsService;
-            _kafkaConsumerService = kafkaConsumerService;
+            _kafkaProducerService = kafkaProducerService;
         }
 
         public async Task<EventDto> CreateEventAsync(EventDto eventDto)
@@ -112,7 +112,6 @@ namespace event_service.Service
 
             _context.Entry(eventItem).State = EntityState.Modified;
             await _context.SaveChangesAsync();
-
             return true;
         }
 
@@ -124,10 +123,36 @@ namespace event_service.Service
             {
                 return false;
             }
-
             _context.Events.Remove(eventItem);
-            await _context.SaveChangesAsync();
+            var schedules = await _context.Schedules.Where(e => e.EventId == eventItem.id).ToListAsync();
+            if (schedules != null)
+            {
+                foreach (var i in schedules)
+                {
+                    var schedules_par = await _context.Schedule_Participants.Where(e => e.scheduleId == i.Id).ToListAsync();
+                    _context.Schedule_Participants.RemoveRange(schedules_par);
+                }
 
+                _context.Schedules.RemoveRange(schedules);
+            }
+            var eventAttendances = await _context.EventAttendances.Where(e => e.eventId == eventItem.id).ToListAsync();
+            if (eventAttendances != null && eventAttendances.Any())
+            {
+                _context.EventAttendances.RemoveRange(eventAttendances);
+            }
+            var paritipant = await _context.Participants.Where(e => e.eventId == eventItem.id).ToListAsync();
+            if (paritipant != null && paritipant.Any())
+            {
+                _context.Participants.RemoveRange(paritipant);
+            }
+            var review = await _context.Reviews.Where(e => e.Eventid == eventItem.id).ToListAsync();
+            if (review != null && review.Any())
+            {
+                _context.Reviews.RemoveRange(review);
+            }
+
+            await _context.SaveChangesAsync();
+            await _kafkaProducerService.SendMessageAsync(eventItem.id);
             return true;
         }
 

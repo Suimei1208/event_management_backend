@@ -1,6 +1,7 @@
 
 using event_finance_service.DbContext;
 using event_finance_service.Middleware;
+using event_finance_service.Service;
 using event_service.Interface;
 using event_service.Service;
 using FirebaseAdmin.Auth;
@@ -17,6 +18,8 @@ namespace event_finance_service
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+            builder.Services.Configure<KafkaSettings>(builder.Configuration.GetSection("Kafka"));
+            builder.Services.AddHostedService<KafkaConsumerService>();
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(
                 op =>
