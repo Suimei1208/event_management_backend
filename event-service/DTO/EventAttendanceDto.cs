@@ -18,6 +18,7 @@
 
     public class EventStatisticsDto
     {
+        public int checkedInParticipants { get; set; }
         public double AverageParticipationTime { get; set; }
         public double ParticipationPercentage { get; set; }
         public string AverageParticipationTimeFormatted { get; internal set; }

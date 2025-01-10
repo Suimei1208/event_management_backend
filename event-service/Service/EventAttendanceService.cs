@@ -200,6 +200,7 @@ namespace event_service.Service
 
                 return new EventStatisticsDto
                 {
+                    checkedInParticipants = checkedInParticipants,
                     AverageParticipationTime = averageParticipationTimeMinutes, 
                     AverageParticipationTimeFormatted = averageParticipationTimeFormatted,
                     ParticipationPercentage = participationPercentage

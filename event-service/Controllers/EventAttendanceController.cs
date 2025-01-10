@@ -156,7 +156,6 @@ namespace event_service.Controllers
                 {
                     Success = false,
                     Message = ex.Message,
-                    Data = null
                 });
             }
         }
