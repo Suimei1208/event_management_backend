@@ -17,6 +17,8 @@ namespace event_finance_service
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+            builder.Services.Configure<KafkaSettings>(builder.Configuration.GetSection("Kafka"));
+            builder.Services.AddHostedService<KafkaConsumerService>();
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(
                 op =>

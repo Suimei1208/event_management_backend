@@ -27,6 +27,8 @@ namespace event_service
             builder.Services.AddScoped<IReviewService, ReviewService>();
             builder.Services.AddScoped<FirebaseService>();
 
+
+
             builder.Services.AddSingleton<FirebaseAuth>(provider =>
             {
                 var firebaseApp = provider.GetRequiredService<FirebaseApp>();
@@ -57,7 +59,7 @@ namespace event_service
                    new MySqlServerVersion(new Version(9, 1,0))
                )
             );
-            builder.Services.AddSingleton<IKafkaProducerService, KafkaProducerService>();
+            
             builder.Services.AddControllers();
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                .AddJwtBearer(
@@ -124,12 +126,13 @@ namespace event_service
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+            builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
+            builder.Services.AddScoped<IKafkaProducerService, KafkaProducerService>();
             builder.Services.AddScoped<IEventService, EventService>();
             builder.Services.AddScoped<IParticipantsService, ParticipantsService>();
             builder.Services.AddScoped<IEventAttendanceService, EventAttendanceService>();
             builder.Services.AddScoped<ISpecialParticipants, SpecialParticipantsService>();
             builder.Services.AddScoped<INotification, Notification_service>();
-            builder.Services.AddScoped<KafkaConsumerService>();
 
             var app = builder.Build();
 
