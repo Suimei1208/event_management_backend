@@ -170,7 +170,7 @@ namespace user_services.Services
             var user = await _context.Users.FirstOrDefaultAsync(u => u.NameFromEmail == studentId);
 
             if (user == null)
-                throw new InvalidOperationException("User not found.");
+                return null;
 
             return new CustomUser
             {

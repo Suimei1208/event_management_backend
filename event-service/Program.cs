@@ -26,8 +26,15 @@ namespace event_service
             builder.Services.AddScoped<IEmailService, EmailService>();
             builder.Services.AddScoped<IReviewService, ReviewService>();
             builder.Services.AddScoped<FirebaseService>();
-
-
+            builder.Services.AddCors(options =>
+            {
+                options.AddDefaultPolicy(policy =>
+                {
+                    policy.AllowAnyOrigin()
+                          .AllowAnyMethod()
+                          .AllowAnyHeader();
+                });
+            });
 
             builder.Services.AddSingleton<FirebaseAuth>(provider =>
             {
@@ -142,7 +149,7 @@ namespace event_service
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
-
+            app.UseCors();
             app.UseHttpsRedirection();
             app.UseAuthentication();
 

@@ -18,6 +18,15 @@ namespace ticket_service
             var builder = WebApplication.CreateBuilder(args);
             builder.Services.AddScoped<ITicketService, TicketService>();
             // In Program.cs or Startup.cs
+            builder.Services.AddCors(options =>
+            {
+                options.AddDefaultPolicy(policy =>
+                {
+                    policy.AllowAnyOrigin()
+                          .AllowAnyMethod()
+                          .AllowAnyHeader();
+                });
+            });
             builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             builder.Services.Configure<KafkaSettings>(builder.Configuration.GetSection("Kafka"));
             builder.Services.AddHostedService<KafkaConsumerService>();
@@ -102,7 +111,7 @@ namespace ticket_service
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
-
+            app.UseCors();
             app.UseHttpsRedirection();
 
             app.UseMiddleware<LoggingMiddleware>();

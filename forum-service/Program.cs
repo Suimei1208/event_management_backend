@@ -19,7 +19,15 @@ namespace forum_service
             var builder = WebApplication.CreateBuilder(args);
             builder.Services.AddScoped<IForumPostService, ForumPostService>();
             builder.Services.AddHttpContextAccessor();
-
+            builder.Services.AddCors(options =>
+            {
+                options.AddDefaultPolicy(policy =>
+                {
+                    policy.AllowAnyOrigin()
+                          .AllowAnyMethod()
+                          .AllowAnyHeader();
+                });
+            });
             // Add services to the container.
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(
@@ -96,7 +104,7 @@ namespace forum_service
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
-
+            app.UseCors();
             app.UseHttpsRedirection();
 
             app.UseMiddleware<LoggingMiddleware>();
