@@ -17,6 +17,15 @@ namespace event_finance_service
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+            builder.Services.AddCors(options =>
+            {
+                options.AddDefaultPolicy(policy =>
+                {
+                    policy.AllowAnyOrigin()
+                          .AllowAnyMethod()
+                          .AllowAnyHeader();
+                });
+            });
             builder.Services.Configure<KafkaSettings>(builder.Configuration.GetSection("Kafka"));
             builder.Services.AddHostedService<KafkaConsumerService>();
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -98,9 +107,8 @@ namespace event_finance_service
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
-
+            app.UseCors();
             app.UseHttpsRedirection();
-
             app.UseMiddleware<LoggingMiddleware>();
             app.UseAuthentication();
             app.UseAuthorization();

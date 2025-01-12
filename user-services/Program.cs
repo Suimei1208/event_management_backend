@@ -22,10 +22,18 @@ namespace user_services
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-
             //builder.Services.Configure<KafkaSettings>(builder.Configuration.GetSection("Kafka"));
             //builder.Services.AddHostedService<KafkaConsumerService>();
             //builder.Services.AddScoped<KafkaProducerService>();
+            builder.Services.AddCors(options =>
+            {
+                options.AddDefaultPolicy(policy =>
+                {
+                    policy.AllowAnyOrigin()
+                          .AllowAnyMethod()
+                          .AllowAnyHeader();
+                });
+            });
             builder.Services.AddSingleton<FirebaseApp>(provider =>
             {
                 return FirebaseApp.Create(new AppOptions()
@@ -113,7 +121,7 @@ namespace user_services
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
-
+            app.UseCors();
             app.UseHttpsRedirection();
             app.UseMiddleware<LoggingMiddleware>();
             app.UseAuthentication();
