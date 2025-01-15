@@ -37,4 +37,8 @@
     <Folder Include="Email\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\user-services\user-services.csproj" />
+  </ItemGroup>
+
 </Project>

@@ -15,9 +15,9 @@ namespace event_service.Controllers
             _eventAttendanceService = eventAttendanceService;
         }
 
-        [HttpGet("event/{eventId}/participants")]
+        [HttpGet("event/{eventId}/checked-in-n-out-participants")]
         [Authorize]
-        public async Task<IActionResult> GetParticipants(int eventId)
+        public async Task<IActionResult> GetCheckedInNOutParticipants(int eventId)
         {
             try
             {
@@ -41,39 +41,103 @@ namespace event_service.Controllers
             }
         }
 
-        [HttpPost("event/{EventId}/checkin")]
+        [HttpGet("event/{eventId}/checked-in-participants")]
         [Authorize]
-        public async Task<IActionResult> CheckIn(int EventId, [FromBody] CheckInRequest request)
+        public async Task<IActionResult> GetCheckedInParticipants(int eventId)
         {
-            if (request == null)
+            try
+            {
+                var participants = await _eventAttendanceService.GetCheckedInParticipantsAsync(eventId);
+
+                return Ok(new CustomData
+                {
+                    Success = true,
+                    Message = "Participants fetched successfully.",
+                    Data = participants
+                });
+            }
+            catch (Exception ex)
             {
                 return BadRequest(new CustomData
                 {
                     Success = false,
-                    Message = "Request cannot be null.",
+                    Message = ex.Message,
                     Data = null
                 });
             }
+        }
 
-            if (string.IsNullOrEmpty(request.QRCode))
+        [HttpGet("event/{eventId}/checked-out-participants")]
+        [Authorize]
+        public async Task<IActionResult> GetCheckedOutParticipants(int eventId)
+        {
+            try
+            {
+                var participants = await _eventAttendanceService.GetCheckedOutParticipantsAsync(eventId);
+
+                return Ok(new CustomData
+                {
+                    Success = true,
+                    Message = "Participants fetched successfully.",
+                    Data = participants
+                });
+            }
+            catch (Exception ex)
             {
                 return BadRequest(new CustomData
                 {
                     Success = false,
-                    Message = "QR code cannot be null or empty.",
+                    Message = ex.Message,
+                    Data = null
+                });
+            }
+        }
+
+        [HttpPost("event/{EventId}/checkin/{inputName?}")]
+        [Authorize]
+        public async Task<IActionResult> CheckIn(int EventId, string? inputName, [FromBody] CheckInRequest? request)
+        {
+            if (string.IsNullOrEmpty(inputName) && (request == null || string.IsNullOrEmpty(request.QRCode)))
+            {
+                return BadRequest(new CustomData
+                {
+                    Success = false,
+                    Message = "Either inputName or QR code must be provided.",
                     Data = null
                 });
             }
 
             try
             {
-                string qrCode = request.QRCode.Trim('"');
-
-                await _eventAttendanceService.RecordCheckInAsync(qrCode);
-                return Ok(new CustomData
+                // Process the check-in based on inputName
+                if (!string.IsNullOrEmpty(inputName))
                 {
-                    Success = true,
-                    Message = "Check-in successful",
+                    await _eventAttendanceService.RecordCheckInManuallyAsync(EventId, inputName);
+                    return Ok(new CustomData
+                    {
+                        Success = true,
+                        Message = $"Check-in successful for {inputName}",
+                        Data = null
+                    });
+                }
+
+                // Process the check-in based on QRCode
+                if (request != null && !string.IsNullOrEmpty(request.QRCode))
+                {
+                    string qrCode = request.QRCode.Trim('"');
+                    await _eventAttendanceService.RecordCheckInAsync(qrCode);
+                    return Ok(new CustomData
+                    {
+                        Success = true,
+                        Message = "Check-in successful using QR code.",
+                        Data = null
+                    });
+                }
+
+                return BadRequest(new CustomData
+                {
+                    Success = false,
+                    Message = "Invalid check-in data provided.",
                     Data = null
                 });
             }
@@ -88,39 +152,52 @@ namespace event_service.Controllers
             }
         }
 
-        [HttpPost("event/{EventId}/checkout")]
-        [Authorize]
-        public async Task<IActionResult> Checkout(int EventId, [FromBody] CheckInRequest request)
-        {
-            if (request == null)
-            {
-                return BadRequest(new CustomData
-                {
-                    Success = false,
-                    Message = "Request cannot be null.",
-                    Data = null
-                });
-            }
 
-            if (string.IsNullOrEmpty(request.QRCode))
+        [HttpPost("event/{EventId}/checkout/{inputName?}")]
+        [Authorize]
+        public async Task<IActionResult> Checkout(int EventId, string? inputName, [FromBody] CheckInRequest? request)
+        {
+            if (string.IsNullOrEmpty(inputName) && (request == null || string.IsNullOrEmpty(request.QRCode)))
             {
                 return BadRequest(new CustomData
                 {
                     Success = false,
-                    Message = "QR code cannot be null or empty.",
+                    Message = "Either inputName or QR code must be provided.",
                     Data = null
                 });
             }
 
             try
             {
-                string qrCode = request.QRCode.Trim('"');
-
-                await _eventAttendanceService.RecordCheckOutAsync(qrCode);
-                return Ok(new CustomData
+                // Process the check-out based on inputName
+                if (!string.IsNullOrEmpty(inputName))
                 {
-                    Success = true,
-                    Message = "Check-in successful",
+                    await _eventAttendanceService.RecordCheckOutManuallyAsync(EventId, inputName);
+                    return Ok(new CustomData
+                    {
+                        Success = true,
+                        Message = $"Check-out successful for {inputName}",
+                        Data = null
+                    });
+                }
+
+                // Process the check-out based on QRCode
+                if (request != null && !string.IsNullOrEmpty(request.QRCode))
+                {
+                    string qrCode = request.QRCode.Trim('"');
+                    await _eventAttendanceService.RecordCheckOutAsync(qrCode);
+                    return Ok(new CustomData
+                    {
+                        Success = true,
+                        Message = "Check-out successful using QR code.",
+                        Data = null
+                    });
+                }
+
+                return BadRequest(new CustomData
+                {
+                    Success = false,
+                    Message = "Invalid check-out data provided.",
                     Data = null
                 });
             }
@@ -134,6 +211,7 @@ namespace event_service.Controllers
                 });
             }
         }
+
 
         [HttpGet("event/{eventId}/stats")]
         [Authorize]
