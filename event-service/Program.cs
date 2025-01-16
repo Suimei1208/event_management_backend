@@ -26,6 +26,7 @@ namespace event_service
             builder.Services.AddScoped<IEmailService, EmailService>();
             builder.Services.AddScoped<IReviewService, ReviewService>();
             builder.Services.AddScoped<FirebaseService>();
+            builder.Services.AddHttpContextAccessor();
             builder.Services.AddCors(options =>
             {
                 options.AddDefaultPolicy(policy =>
@@ -140,6 +141,7 @@ namespace event_service
             builder.Services.AddScoped<IEventAttendanceService, EventAttendanceService>();
             builder.Services.AddScoped<ISpecialParticipants, SpecialParticipantsService>();
             builder.Services.AddScoped<INotification, Notification_service>();
+
 
             var app = builder.Build();
 
