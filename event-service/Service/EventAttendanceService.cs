@@ -149,10 +149,13 @@ namespace event_service.Service
             }
         }
 
-        public async Task RecordCheckInAsync(string qrCode)
+        public async Task RecordCheckInAsync(string qrCode, int eventId)
         {
-            (string userId, int eventId) = DecodeQRCode(qrCode);
-
+            (string userId, int qrEventId) = DecodeQRCode(qrCode);
+            if(qrEventId != eventId)
+            {
+                throw new Exception("Event not match.");
+            }
             var eventEntity = await _context.Events.FirstOrDefaultAsync(e => e.id == eventId);
             if (eventEntity == null)
             {
@@ -195,10 +198,13 @@ namespace event_service.Service
             await _context.SaveChangesAsync();
         }
 
-        public async Task RecordCheckOutAsync(string qrCode)
+        public async Task RecordCheckOutAsync(string qrCode, int eventId)
         {
-            (string userId, int eventId) = DecodeQRCode(qrCode);
-
+            (string userId, int qreventId) = DecodeQRCode(qrCode);
+            if(eventId != qreventId)
+            {
+                throw new Exception("Event not match.");
+            }
             var eventEntity = await _context.Events.FirstOrDefaultAsync(e => e.id == eventId);
             if (eventEntity == null)
             {
