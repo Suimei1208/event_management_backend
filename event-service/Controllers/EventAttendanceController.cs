@@ -125,7 +125,7 @@ namespace event_service.Controllers
                 if (request != null && !string.IsNullOrEmpty(request.QRCode))
                 {
                     string qrCode = request.QRCode.Trim('"');
-                    await _eventAttendanceService.RecordCheckInAsync(qrCode);
+                    await _eventAttendanceService.RecordCheckInAsync(qrCode, EventId);
                     return Ok(new CustomData
                     {
                         Success = true,
@@ -185,7 +185,7 @@ namespace event_service.Controllers
                 if (request != null && !string.IsNullOrEmpty(request.QRCode))
                 {
                     string qrCode = request.QRCode.Trim('"');
-                    await _eventAttendanceService.RecordCheckOutAsync(qrCode);
+                    await _eventAttendanceService.RecordCheckOutAsync(qrCode, EventId);
                     return Ok(new CustomData
                     {
                         Success = true,
