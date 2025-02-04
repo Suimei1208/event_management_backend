@@ -2,10 +2,10 @@
 
 #nullable disable
 
-namespace user_services.Migrations
+namespace event_service.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate13 : Migration
+    public partial class Railway : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

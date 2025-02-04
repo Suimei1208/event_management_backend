@@ -31,7 +31,7 @@ namespace event_service.Middleware
                         if (DateTime.Now.Date < ev.StartDate.AddDays(-1).Date)
                         {
                             var participants = _context.Participants
-                                .Where(p => p.eventId == ev.id && !p.EmailSent) 
+                                .Where(p => p.eventId == ev.id && !p.EmailSent)
                                 .ToList();
                             foreach (var p in participants)
                             {
@@ -50,7 +50,7 @@ namespace event_service.Middleware
 
                                     // Đánh dấu đã gửi email
                                     p.EmailSent = true;
-                                    await _context.SaveChangesAsync(); 
+                                    await _context.SaveChangesAsync();
                                 }
                                 catch (FirebaseAuthException ex)
                                 {
@@ -59,7 +59,7 @@ namespace event_service.Middleware
                             }
                         }
                     }
-                    await Task.Delay(TimeSpan.FromSeconds(300), stoppingToken); 
+                    await Task.Delay(TimeSpan.FromSeconds(300), stoppingToken);
                 }
             }
         }

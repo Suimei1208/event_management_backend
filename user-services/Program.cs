@@ -100,10 +100,11 @@ namespace user_services
 
             builder.Services.AddSingleton<IFirebaseAuthService, FirebaseAuthService>();
             builder.Services.AddDbContext<UserDbContext>(options =>
-               options.UseMySql(
-                   builder.Configuration.GetConnectionString("DefaultConnection"),
-                   new MySqlServerVersion(new Version(9, 1, 0))
-               ).EnableDetailedErrors()
+                   options.UseMySql(
+        builder.Configuration.GetConnectionString("DefaultConnection"),
+        ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("DefaultConnection")),
+        mySqlOptions => mySqlOptions.EnableRetryOnFailure()
+    )
            );
             builder.Services.AddScoped<JwtService>();
             builder.Services.AddScoped<IUserService, UserService>();

@@ -1,4 +1,4 @@
-﻿using E_commerce_Back_end.OPT;
+﻿//using E_commerce_Back_end.OPT;
 using event_service.Interface;
 using event_service.Kafka;
 using event_service.Middleware;
@@ -22,8 +22,8 @@ namespace event_service
         {
             var builder = WebApplication.CreateBuilder(args);
             builder.Services.AddHostedService<EventStatusUpdater>();
-            builder.Services.AddHostedService<sentEmail>();
-            builder.Services.AddScoped<IEmailService, EmailService>();
+            //builder.Services.AddHostedService<sentEmail>();
+            //builder.Services.AddScoped<IEmailService, EmailService>();
             builder.Services.AddScoped<IReviewService, ReviewService>();
             builder.Services.AddScoped<FirebaseService>();
             builder.Services.AddHttpContextAccessor();
@@ -62,10 +62,11 @@ namespace event_service
             });
             // Add services to the container.
             builder.Services.AddDbContext<EventDbContext>(options =>
-               options.UseMySql(
-                   builder.Configuration.GetConnectionString("DefaultConnection"),
-                   new MySqlServerVersion(new Version(9, 1,0))
-               )
+                   options.UseMySql(
+        builder.Configuration.GetConnectionString("DefaultConnection"),
+        ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("DefaultConnection")),
+        mySqlOptions => mySqlOptions.EnableRetryOnFailure()
+    )
             );
             
             builder.Services.AddControllers();
