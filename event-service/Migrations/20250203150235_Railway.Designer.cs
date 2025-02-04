@@ -12,8 +12,8 @@ using event_service;
 namespace event_service.Migrations
 {
     [DbContext(typeof(EventDbContext))]
-    [Migration("20250108050257_add_new")]
-    partial class add_new
+    [Migration("20250203150235_Railway")]
+    partial class Railway
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -178,6 +178,32 @@ namespace event_service.Migrations
                     b.HasIndex("eventId");
 
                     b.ToTable("Participants");
+                });
+
+            modelBuilder.Entity("event_service.Model.Review", b =>
+                {
+                    b.Property<int>("id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("id"));
+
+                    b.Property<int>("Eventid")
+                        .HasColumnType("int");
+
+                    b.Property<int>("rate")
+                        .HasColumnType("int");
+
+                    b.Property<string>("review")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("uid")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("id");
+
+                    b.ToTable("Reviews");
                 });
 
             modelBuilder.Entity("event_service.Model.Schedule_Participants", b =>
