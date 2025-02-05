@@ -234,7 +234,7 @@ namespace event_service.Service
             }
             //}
 
-            var userRegisterEvent = await _context.Participants.Where(u => u.userId == uid).ToListAsync();
+            var userRegisterEvent = await _context.Participants.Where(u => u.userId == uid && u.status != "Pending").ToListAsync();
             if (userRegisterEvent == null || !userRegisterEvent.Any())
             {
                 return listEvent.OrderBy(e => Math.Abs((e.StartDate - DateTime.Now).TotalMilliseconds))
