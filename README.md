@@ -28,7 +28,9 @@ Navigate to lib/config.dart.
 
 Modify the configuration
 If you want to run on a emulator device, change your IP to 10.0.2.2.
+
 If it is a real device, change it to your device IP.
+
 If it is web, change to localhost.
 
 Open terminal and run command "flutter pub get"
