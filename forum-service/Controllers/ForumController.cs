@@ -2,6 +2,8 @@
 using forum_service.Interface;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
 
 namespace forum_service.Controllers
 {
@@ -63,5 +65,38 @@ namespace forum_service.Controllers
             });
         }
 
+        [HttpDelete("forum/delete-post/{idPost}")]
+        [Authorize]
+        public async Task<IActionResult> DeletePost(int idPost)
+        {
+            await _forumPostService.DeletePost(idPost);
+            return Ok(new
+            {
+                success = true,
+                message = "Delete post successfully",
+            });
+        }
+
+        [HttpPut("forum/edit-post")]
+        [Authorize]
+        public async Task<IActionResult> EditPost([FromBody] EditPostRequest request)
+        {
+            await _forumPostService.EditPost(request.PostId, request.Title, request.Description, request.Category,request.Image);
+            return Ok(new
+            {
+                success = true,
+                message = "Edit post successfully",
+            });
+        }
+
     }
+    public class EditPostRequest
+    {
+        public int PostId { get; set; }
+        public string Title { get; set; }
+        public string Description { get; set; }
+        public string Category { get; set; }
+        public string? Image { get; set; }
+    }
+
 }

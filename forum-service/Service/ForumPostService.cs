@@ -203,6 +203,24 @@ namespace forum_service.Service
             await _context.SaveChangesAsync();
         }
 
+        public async Task DeletePost(int idPost)
+        {
+            var post = await _context.Forums.FirstOrDefaultAsync(e => e.id == idPost);
+            if (post == null)
+            {
+                return;
+            }
+
+            var comments = await _context.Comments.Where(c => c.post_id == post.id).ToListAsync();
+            foreach (var comment in comments)
+            {
+                await DeleteComment(comment.id);
+            }
+
+            _context.Forums.Remove(post);
+            await _context.SaveChangesAsync();
+        }
+
         public async Task DeleteComment(int commentId)
         {
             var comment = await _context.Comments.FirstOrDefaultAsync(e => e.id == commentId);
@@ -210,11 +228,13 @@ namespace forum_service.Service
             {
                 return;
             }
+
             var replies = await _context.CommentReplies.Where(e => e.comment_id == comment.id).ToListAsync();
-            foreach (var i in replies)
+            foreach (var reply in replies)
             {
-                _context.CommentReplies.Remove(i);
+                await DeleteReplyComment(reply.id);
             }
+
             _context.Comments.Remove(comment);
             await _context.SaveChangesAsync();
         }
@@ -226,8 +246,30 @@ namespace forum_service.Service
             {
                 return;
             }
+
             _context.CommentReplies.Remove(reply);
             await _context.SaveChangesAsync();
         }
+
+        public async Task EditPost(int postId, string title, string description, string category, string? image)
+        {
+            var post = await _context.Forums.FirstOrDefaultAsync(e => e.id == postId);
+            if (post == null)
+            {
+                return;
+            }
+
+            post.title = title;
+            post.description = description;
+            post.category = category;
+
+            if (!string.IsNullOrEmpty(image))
+            {
+                post.image = image;
+            }
+
+            await _context.SaveChangesAsync();
+        }
+
     }
 }
