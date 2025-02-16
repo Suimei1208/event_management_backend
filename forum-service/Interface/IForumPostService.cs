@@ -13,5 +13,7 @@ namespace forum_service.Interface
         Task CreateReplyComment(CommentReplies commentReplies);
         Task DeleteComment(int commentId);
         Task DeleteReplyComment(int commentId);
+        Task DeletePost(int idPost);
+        Task EditPost(int postId, string title, string description, string category, string? image);
     }
 }
