@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace event_service.Model
 {
-    public class Participants
+    public class ScheduleParticipants
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]

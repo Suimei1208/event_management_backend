@@ -15,9 +15,9 @@ namespace event_service.DTO
 
     public static class ParticipantsMapper
     {
-        public static Participants ToEntity(this ParticipantsDto participantsDto)
+        public static ScheduleParticipants ToEntity(this ParticipantsDto participantsDto)
         {
-            return new Participants
+            return new ScheduleParticipants
             {
                 id = participantsDto.id,
                 userId = participantsDto.userId,
@@ -28,7 +28,7 @@ namespace event_service.DTO
             };
         }
 
-        public static ParticipantsDto ToDto(this Participants participants)
+        public static ParticipantsDto ToDto(this ScheduleParticipants participants)
         {
             return new ParticipantsDto
             {

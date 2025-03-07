@@ -69,7 +69,7 @@ namespace event_service.Service
             await _context.SaveChangesAsync();
         }
 
-        public async Task<List<Participants>> AddParticipantsFromExcelAsync(int eventId, List<string> userIds)
+        public async Task<List<ScheduleParticipants>> AddParticipantsFromExcelAsync(int eventId, List<string> userIds)
         {
             var existingUserIds = await _context.Participants
                 .Where(p => p.eventId == eventId)
@@ -78,7 +78,7 @@ namespace event_service.Service
 
             var newUserIds = userIds.Where(userId => !existingUserIds.Contains(userId)).ToList();
 
-            var participants = newUserIds.Select(userId => new Participants
+            var participants = newUserIds.Select(userId => new ScheduleParticipants
             {
                 userId = userId,
                 eventId = eventId,

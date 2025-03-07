@@ -10,7 +10,7 @@ namespace event_service
         public EventDbContext(DbContextOptions<EventDbContext> options) : base(options) { }
         
         public DbSet<Events> Events { get; set; }
-        public DbSet<Participants> Participants { get; set; }
+        public DbSet<ScheduleParticipants> Participants { get; set; }
         public DbSet<Event_Schedules> Schedules { get; set; }
         public DbSet<Schedule_Participants> Schedule_Participants { get; set; }
         public DbSet<Special_Participants> Special_Participants { get; set; }

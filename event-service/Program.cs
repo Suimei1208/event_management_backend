@@ -1,4 +1,4 @@
-﻿//using E_commerce_Back_end.OPT;
+﻿using E_commerce_Back_end.OPT;
 using event_service.Interface;
 using event_service.Kafka;
 using event_service.Middleware;
@@ -22,9 +22,10 @@ namespace event_service
         {
             var builder = WebApplication.CreateBuilder(args);
             builder.Services.AddHostedService<EventStatusUpdater>();
-            //builder.Services.AddHostedService<sentEmail>();
-            //builder.Services.AddScoped<IEmailService, EmailService>();
+            builder.Services.AddHostedService<sentEmail>();
+            builder.Services.AddScoped<IEmailService, EmailService>();
             builder.Services.AddScoped<IReviewService, ReviewService>();
+            builder.Services.AddScoped<IScheduleParticipants, ScheduleParticipantService>();
             builder.Services.AddScoped<FirebaseService>();
             builder.Services.AddHttpContextAccessor();
             builder.Services.AddCors(options =>

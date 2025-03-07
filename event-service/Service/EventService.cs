@@ -213,7 +213,7 @@ namespace event_service.Service
             //if (role == "Organizer")
             //{
             var list = await GetEventAsync(uid);
-            
+
             if (list != null)
             {
                 foreach (var item in list)
@@ -244,7 +244,7 @@ namespace event_service.Service
             foreach (var participant in userRegisterEvent)
             {
                 var eventItem = await _context.Events.FindAsync(participant.eventId);
-                if(eventItem.Status == "Ongoing" && addedEventIds.Add(eventItem.id))
+                if (eventItem.Status == "Ongoing" && addedEventIds.Add(eventItem.id))
                 {
                     //Console.WriteLine($"StartDate: {eventItem.StartDate}, currentDateTime: {currentDateTime}");
 
@@ -262,7 +262,7 @@ namespace event_service.Service
             }
 
             return listEvent.OrderBy(e => Math.Abs((e.StartDate - DateTime.Now).TotalMilliseconds))
-            .ToList(); 
+            .ToList();
         }
 
         public async Task<ScheduleDto> CreateScheduleAsync(int eventId, ScheduleDto scheduleDto)
@@ -522,7 +522,7 @@ namespace event_service.Service
 
         public async Task<object> GetEventStats(int EventId)
         {
-            var registered = await _context.Participants.CountAsync(e => e.eventId == EventId  &&
+            var registered = await _context.Participants.CountAsync(e => e.eventId == EventId &&
             e.role == "Participant" && e.status == "Approved" || e.status == "Added");
 
             var speaker = await _context.Special_Participants.CountAsync(e => e.eventId == EventId);
@@ -549,6 +549,6 @@ namespace event_service.Service
             await _context.SaveChangesAsync();
         }
 
-        
+
     }
 }
